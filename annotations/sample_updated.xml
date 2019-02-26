@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document filename="hello-world.xml">
+    <table id="1" page="int(page_number)">
+        <tab_coords points="int(x1),int(y1) int(x1),int(y2) int(x2),int(y2) int(x2),int(y1)"/>
+        <!--end-row and end-col attributes exits if cell is cross-row / cross-col-->
+        <cell start-row="int(start-row)" start-col="int(start-col)">
+            <coords points="int(x1),int(y1) int(x1),int(y2) int(x2),int(y2) int(x2),int(y1)"/>
+            <content>random content</content>
+        </cell>
+
+        <cell start-row="int(start-row)" start-col="int(start-col)" end-row="int(end-row)" end-col="int(end-col)">
+            <coords points="int(x1),int(y1) int(x1),int(y2) int(x2),int(y2) int(x2),int(y1)"/>
+            <!--sample of rows with "\n"-->
+            <content>random content
+that cross rows</content>
+        </cell>
+    </table>
+
+    <table id="2">
+        <!--content of table 2-->
+    </table>
+</document>
