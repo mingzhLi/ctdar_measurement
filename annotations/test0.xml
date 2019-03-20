@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document filename="test2">
+	<table id="1">
+		<Coords points="92,442 92,528 350,528 350,442"/>
+        <!--row 1-->
+		<cell end-col="0" end-row="0" id="0" start-col="0" start-row="0">
+			<Coords points="154,442 154,453 188,453 188,442"/>
+			<content>1-1</content>
+		</cell>
+		<cell end-col="1" end-row="0" id="1" start-col="1" start-row="0">
+			<Coords points="154,442 154,453 200,453 200,442"/>
+			<content>1-2</content>
+		</cell>
+		<cell end-col="2" end-row="0" id="2" start-col="2" start-row="0">
+			<Coords points="205,442 205,453 250,453 250,442"/>
+			<content>1-3</content>
+		</cell>
+		<cell end-col="3" end-row="0" id="3" start-col="3" start-row="0">
+			<Coords points="254,442 254,453 300,453 300,442"/>
+			<content>1-4</content>
+		</cell>
+		<cell end-col="4" end-row="0" id="4" start-col="4" start-row="0">
+			<Coords points="316,442 316,453 338,453 338,442"/>
+			<content>1-5</content>
+		</cell>
+
+        <!--row 2-->
+		<cell end-col="0" end-row="1" id="5" start-col="0" start-row="1">
+			<Coords points="92,461 92,472 136,472 136,461"/>
+			<content>2-1</content>
+		</cell>
+		<!--<cell end-col="2" end-row="1" id="6" start-col="1" start-row="1">-->
+			<!--<Coords points="11,22 33,44 55,66 77,88"/>-->
+			<!--<content>2-2 (2)</content>-->
+		<!--</cell>-->
+        <cell end-col="4" end-row="1" id="7" start-col="3" start-row="1">
+			<Coords points="111,222 333,444 555,666 777,888"/>
+			<content>2-3 (2)</content>
+		</cell>
+		<!--row 3-->
+        <!--empty-->
+
+        <!--row4-->
+        <cell end-col="0" end-row="3" id="8" start-col="0" start-row="3">
+			<Coords points="154,442 154,453 188,453 188,442"/>
+			<content>4-1</content>
+		</cell>
+		<cell end-col="1" end-row="3" id="9" start-col="1" start-row="3">
+			<Coords points="154,442 154,453 200,453 200,442"/>
+			<content>4-2</content>
+		</cell>
+		<cell end-col="2" end-row="3" id="10" start-col="2" start-row="3">
+			<Coords points="205,442 205,453 250,453 250,442"/>
+			<content>4-3</content>
+		</cell>
+		<!--<cell end-col="3" end-row="3" id="11" start-col="3" start-row="3">-->
+			<!--<Coords points="254,442 254,453 300,453 300,442"/>-->
+			<!--<content>4-4</content>-->
+		<!--</cell>-->
+		<cell end-col="4" end-row="3" id="12" start-col="4" start-row="3">
+			<Coords points="316,442 316,453 338,453 338,442"/>
+			<content>4-5</content>
+		</cell>
+    </table>
+
+    <!--<table id="2">-->
+				<!--<Coords points="92,442 92,528 350,528 350,442"/>-->
+		<!--<cell end-col="0" end-row="0" id="0" start-col="0" start-row="0">-->
+			<!--<Coords points="154,442 154,453 188,453 188,442"/>-->
+			<!--<content>Hello</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="1" end-row="0" id="1" start-col="1" start-row="0">-->
+			<!--<Coords points="154,442 154,453 200,453 200,442"/>-->
+			<!--<content>IndustryA</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="2" end-row="0" id="2" start-col="2" start-row="0">-->
+			<!--<Coords points="205,442 205,453 250,453 250,442"/>-->
+			<!--<content>IndustryB</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="3" end-row="0" id="3" start-col="3" start-row="0">-->
+			<!--<Coords points="254,442 254,453 300,453 300,442"/>-->
+			<!--<content>IndustryC</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="4" end-row="0" id="4" start-col="4" start-row="0">-->
+			<!--<Coords points="316,442 316,453 338,453 338,442"/>-->
+			<!--<content>Total</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="0" end-row="1" id="5" start-col="0" start-row="1">-->
+			<!--<Coords points="92,461 92,472 136,472 136,461"/>-->
+			<!--<content>ProductA</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="2" end-row="1" id="6" start-col="1" start-row="1">-->
+			<!--<Coords points="11,22 33,44 55,66 77,88"/>-->
+			<!--<content>ProductB</content>-->
+		<!--</cell>-->
+        <!--<cell end-col="4" end-row="1" id="7" start-col="3" start-row="1">-->
+			<!--<Coords points="111,222 333,444 555,666 777,888"/>-->
+			<!--<content>ProductC</content>-->
+		<!--</cell>-->
+    <!--</table>-->
+</document>

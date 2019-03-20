@@ -1,85 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document filename="hello-world.xml">
-    <table id="1">
-        <region id="1" page="2">
-            <!--end-row and end-col attributes exits if cell is cross-row / cross-col-->
-            <cell start-row="0" start-col="0">
-                <bounding-box x1="11" y1="22" x2="33" y2="44"/>
-                <!--<content>Since I left you, mine eye is in my mind</content>-->
-                <content>Content1</content>
-            </cell>
-
-            <cell start-row="0" start-col="1" end-col="3">
-                <bounding-box x1="111" y1="222" x2="333" y2="444"/>
-                <!--<content>And that which governs me to go about</content>-->
-                <content>Content2</content>
-            </cell>
-
-            <cell start-row="0" start-col="4" end-col="5">
-                <bounding-box x1="1111" y1="2222" x2="3333" y2="4444"/>
-                <!--<content>Doth part his function and is partly blind</content>-->
-                <content>Content3</content>
-            </cell>
-
-            <cell start-row="1" start-col="0" end-col="2">
-                <bounding-box x1="110" y1="220" x2="330" y2="440"/>
-                <!--<content>Seems seeing, but effectually is out</content>-->
-                <content>Content4</content>
-            </cell>
-
-            <cell start-row="1" start-col="3" end-col="5">
-                <bounding-box x1="1110" y1="2220" x2="3330" y2="4440"/>
-                <!--<content>For it no form delivers to the heart</content>-->
-                <content>Content5</content>
-            </cell>
-
-            <cell start-row="2" start-col="0" end-col="5">
-                <bounding-box x1="12" y1="123" x2="1234" y2="4321"/>
-                <content>Content6</content>
-            </cell>
-        </region>
-
-        <!--<region id="2" page="3">-->
-            <!--<cell start-row="0" start-col="0">-->
-                <!--<bounding-box x1="99" y1="88" x2="77" y2="66"/>-->
-                <!--<content>Of bird of flower, or shape, which it doth latch</content>-->
-            <!--</cell>-->
-
-            <!--<cell start-row="0" start-col="1" end-col="3">-->
-                <!--<bounding-box x1="999" y1="888" x2="777" y2="666"/>-->
-                <!--&lt;!&ndash;sample of rows with "\n"&ndash;&gt;-->
-                <!--<content>Of his quick objects hath the mind no part</content>-->
-            <!--</cell>-->
-
-            <!--<cell start-row="0" start-col="4" end-col="5">-->
-                <!--<bounding-box x1="9999" y1="8888" x2="7777" y2="6666"/>-->
-                <!--&lt;!&ndash;sample of rows with "\n"&ndash;&gt;-->
-                <!--<content>Nor his own vision holds what it doth catch</content>-->
-            <!--</cell>-->
-
-            <!--<cell start-row="1" start-col="0" end-col="2">-->
-                <!--<bounding-box x1="990" y1="880" x2="770" y2="660"/>-->
-                <!--&lt;!&ndash;sample of rows with "\n"&ndash;&gt;-->
-                <!--<content>For if it see the rudest or gentlest sight</content>-->
-            <!--</cell>-->
-
-            <!--<cell start-row="1" start-col="3" end-col="5">-->
-                <!--<bounding-box x1="9990" y1="8880" x2="7770" y2="6660"/>-->
-                <!--&lt;!&ndash;sample of rows with "\n"&ndash;&gt;-->
-                <!--<content>The most sweet favour or deformed'st creature</content>-->
-            <!--</cell>-->
-        <!--</region>-->
+<document filename="test1">
+	<table id="1">
+		<Coords points="92,442 92,528 350,528 350,442"/>
+        <cell end-col="0" end-row="0" id="0" start-col="0" start-row="0">
+			<Coords points="100,442 100,453 150,453 150,442"/>
+			<content>Hello</content>
+		</cell>
+		<cell end-col="1" end-row="0" id="1" start-col="1" start-row="0">
+			<Coords points="154,442 154,453 200,453 200,442"/>
+			<content>IndustryA</content>
+		</cell>
+		<cell end-col="2" end-row="0" id="2" start-col="2" start-row="0">
+			<Coords points="205,442 205,453 250,453 250,442"/>
+			<content>IndustryB</content>
+		</cell>
+		<cell end-col="3" end-row="0" id="3" start-col="3" start-row="0">
+			<Coords points="254,442 254,453 300,453 300,442"/>
+			<content>IndustryC</content>
+		</cell>
+		<cell end-col="4" end-row="0" id="4" start-col="4" start-row="0">
+			<Coords points="316,442 316,453 338,453 338,442"/>
+			<content>Total</content>
+		</cell>
+		<cell end-col="0" end-row="1" id="5" start-col="0" start-row="1">
+			<Coords points="92,461 92,472 136,472 136,461"/>
+			<content>ProductA</content>
+		</cell>
+		<cell end-col="1" end-row="1" id="6" start-col="1" start-row="1">
+			<Coords points="190,461 190,472 201,472 201,461"/>
+			<content>90</content>
+		</cell>
+		<cell end-col="2" end-row="1" id="7" start-col="2" start-row="1">
+			<Coords points="245,461 245,472 250,472 250,461"/>
+			<content>5</content>
+		</cell>
+		<cell end-col="3" end-row="1" id="8" start-col="3" start-row="1">
+			<Coords points="289,461 289,472 300,472 300,461"/>
+			<content>15</content>
+		</cell>
+		<cell end-col="4" end-row="1" id="9" start-col="4" start-row="1">
+			<Coords points="334,461 334,472 350,472 350,461"/>
+			<content>110</content>
+		</cell>
+		<cell end-col="0" end-row="2" id="10" start-col="0" start-row="2">
+			<Coords points="92,480 92,490 134,490 134,480"/>
+			<content>ProductB</content>
+		</cell>
+		<cell end-col="1" end-row="2" id="11" start-col="1" start-row="2">
+			<Coords points="190,480 190,490 201,490 201,480"/>
+			<content>70</content>
+		</cell>
+		<cell end-col="2" end-row="2" id="12" start-col="2" start-row="2">
+			<Coords points="234,480 234,490 250,490 250,480"/>
+			<content>180</content>
+		</cell>
+		<cell end-col="3" end-row="2" id="13" start-col="3" start-row="2">
+			<Coords points="289,480 289,490 300,490 300,480"/>
+			<content>50</content>
+		</cell>
+		<cell end-col="4" end-row="2" id="14" start-col="4" start-row="2">
+			<Coords points="334,480 334,490 350,490 350,480"/>
+			<content>300</content>
+		</cell>
     </table>
 
-    <table id="2">
-        <region id="1" page="4">
-            <cell start-row="0" start-col="0">
-                <bounding-box x1="11" y1="22" x2="33" y2="44"/>
-                <content>Content1</content>
-            </cell>
-
-
-        </region>
-    </table>
-
+    <!--<table id="2">-->
+		<!--<Coords points="414,442 414,528 673,528 673,442"/>-->
+		<!--<cell end-col="1" end-row="0" id="1" start-col="0" start-row="0">-->
+			<!--<Coords points="477,442 477,453 522,453 522,442"/>-->
+			<!--<content>IndustryA</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="2" end-row="0" id="2" start-col="2" start-row="0">-->
+			<!--<Coords points="528,442 528,453 573,453 573,442"/>-->
+			<!--<content>IndustryB</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="3" end-row="0" id="3" start-col="3" start-row="0">-->
+			<!--<Coords points="577,442 577,453 622,453 622,442"/>-->
+			<!--<content>IndustryC</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="4" end-row="0" id="4" start-col="4" start-row="0">-->
+			<!--<Coords points="640,442 640,453 661,453 661,442"/>-->
+			<!--<content>Total</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="0" end-row="1" id="5" start-col="0" start-row="1">-->
+			<!--<Coords points="414,461 414,472 458,472 458,461"/>-->
+			<!--<content>ProductA</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="1" end-row="1" id="6" start-col="1" start-row="1">-->
+			<!--<Coords points="513,461 513,472 525,472 525,461"/>-->
+			<!--<content>90</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="2" end-row="1" id="7" start-col="2" start-row="1">-->
+			<!--<Coords points="568,461 568,472 573,472 573,461"/>-->
+			<!--<content>5</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="3" end-row="1" id="8" start-col="3" start-row="1">-->
+			<!--<Coords points="612,461 612,472 622,472 622,461"/>-->
+			<!--<content>15</content>-->
+		<!--</cell>-->
+        <!--<cell end-col="4" end-row="1" id="9" start-col="4" start-row="1">-->
+			<!--<Coords points="657,461 657,472 673,472 673,461"/>-->
+			<!--<content>110</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="0" end-row="2" id="10" start-col="0" start-row="2">-->
+			<!--<Coords points="414,480 414,490 458,490 458,480"/>-->
+			<!--<content>ProductB</content>-->
+		<!--</cell>-->
+		<!--<cell end-col="1" end-row="2" id="11" start-col="1" start-row="2">-->
+			<!--<Coords points="513,480 513,490 525,490 525,480"/>-->
+			<!--<content>70</content>-->
+		<!--</cell>-->
+    <!--</table>-->
 </document>

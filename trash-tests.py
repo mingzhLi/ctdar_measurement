@@ -22,9 +22,23 @@
 #     else:
 #         continue
 
+# test of enumerate
+# my_list = [1, 3, 4, 5, 7, 8, 2, 11, 19]
+# for c, value in enumerate(my_list, 0):
+#     # print(c, value)
+#     print(value)
 
-my_list = [1, 3, 4, 5, 7, 8, 2, 11, 19]
-for c, value in enumerate(my_list, 0):
-    # print(c, value)
-    print(value)
+
+# test of groupby
+from itertools import groupby
+
+things = [("animal", "bear"), ("animal", "duck"), ("plant", "cactus"), ("plant", "flower"), ("vehicle", "speed boat"), ("vehicle", "school bus")]
+
+for key, group in groupby(things, lambda x: x[0]):
+    # print(group)
+    # print(key)
+    for thing in group:
+        print(thing)
+        # print("A %s is a %s." % (thing[1], key))
+    print("\n")
 
