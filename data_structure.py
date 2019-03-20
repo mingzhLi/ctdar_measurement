@@ -380,8 +380,6 @@ class Table:
         # print(ret)
         return ret
 
-class Result
-
 if __name__ == "__main__":
     resultFile = "./annotations/test0.xml"
     res_dom = xml.dom.minidom.parse(resultFile)
