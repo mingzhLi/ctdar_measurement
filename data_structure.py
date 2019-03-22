@@ -380,8 +380,32 @@ class Table:
         # print(ret)
         return ret
 
+
+class ResultStructure:
+
+    def __init__(self, truePos, gtTotal, resTotal):
+        self._truePos = truePos
+        self._gtTotal = gtTotal
+        self._resTotal = resTotal
+
+    @property
+    def truePos(self):
+        return self._truePos
+
+    @property
+    def gtTotal(self):
+        return self._gtTotal
+
+    @property
+    def resTotal(self):
+        return self._resTotal
+
+    def __str__(self):
+        return "true: {}, gt: {}, res: {}".format(self._truePos, self._gtTotal, self._resTotal)
+
+
 if __name__ == "__main__":
-    resultFile = "./annotations/test0.xml"
+    resultFile = "./annotations/test_for_data_structure.xml"
     res_dom = xml.dom.minidom.parse(resultFile)
     res_root = res_dom.documentElement
     res_tables = []

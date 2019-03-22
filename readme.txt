@@ -1,22 +1,20 @@
-usage:
+Evaluation Tool for the ICDAR 2019 Competition on Table Detection and Recognition
 
-The command line takes a minimum of 2 and a maximum of 5 parameters as input.
-flag: -reg and -str
+Usage:
+The command line takes 4 parameters as input.
+Specify your track with 3rd parameter as flag: -trackA, -trackB1 or -trackB2
+Specify your result file (must be a .tar.gz file) with the 4th parameter.
 
 
-example:
-1. python evaluate.py test
-->
-Using     GTFile: test.xml
-Using resultFile: test-result.xml
-Using    PDFFile: test.pdf
+Example:
+1. python evaluate.py -trackA ./your-file-path/you-file-name.tar.gz
 
-2. python evaluate.py test hello.xml
-Using     GTFile: test.xml
-Using resultFile: hello.xml
-Using    PDFFile: test.pdf
+2. python evaluate.py -trackB1 ./your-file-path/you-file-name.tar.gz
 
-3. python evaluate.py test hello.xml halo.pdf
-Using     GTFile: test.xml
-Using resultFile: hello.xml
-Using    PDFFile: halo.pdf
+3. python evaluate.py -trackB2 ./your-file-path/you-file-name.tar.gz
+
+
+Additional Notes:
+python evaluate.py -trackA ./result-files/reg.tar.gz
+run the above command for a example test.
+

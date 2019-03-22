@@ -1,7 +1,5 @@
 import os, glob, sys
 import xml.dom.minidom
-import numpy as np
-import shapely
 # from functools import cmp_to_key
 from itertools import groupby
 from data_structure import *
@@ -13,94 +11,64 @@ class eval:
     STR = "-str"
     REG = "-reg"
     DEFAULT_ENCODING = "UTF-8"
-    NO_PAGE = "-nopage"
-    DEBUG = "-debug"
-    COMPARE = "-compare"
-    IGNORE_CHARS = "-ignorechars"
-    STR_IGNORE = "-strignore"
+    # reg_gt_path = "./annotations/trackA/"
+    # str_gt_path = "./annotations/trackB/"
+    reg_gt_path = os.path.abspath("./annotations/trackA/")
+    str_gt_path = os.path.abspath("./annotations/trackB/")
 
-    def __init__(self, *args):
-        inPrefix = None
-        resultFile = None
-        GTFile = None
-        PDFFile = None
-        rulingLines = True
-        processSpaces = False
-        compare = False
-        currentArgumentIndex = 0
-        password = ""
-        encoding = self.DEFAULT_ENCODING
-        startPage = 1
-        endPage = sys.maxsize
-        toConsole = False
-        str = False
-        reg = False
-        debug = False
-        pageCheck = True
-        normRule = 0
+    def __init__(self, track, res_path):
+        self.return_result = None
+        self.reg = False
+        self.str = False
 
-        for arg in args:
-            if arg == self.STR:
-                str = True
-            elif arg == self.REG:
-                reg = True
-            elif arg == self.DEBUG:
-                debug = True
-            elif arg == self.COMPARE:
-                compare = True
-            elif arg == self.NO_PAGE:
-                pageCheck = False
-            elif arg == self.IGNORE_CHARS:
-                normRule = 1
-            elif arg == self.STR_IGNORE:
-                str = True
-                normRule = 1
-            else:
-                if inPrefix is None:
-                    inPrefix = arg
-                    # print(format("inPrefix set, %s\n" % arg))
-                elif resultFile is None:
-                    resultFile = arg
-                else:
-                    PDFFile = arg
+        if track == "-trackA":
+            self.reg = True
+        elif track == "-trackB1":
+            self.str = True
+        elif track == "-trackB2":
+            self.str = True
+        # elif track == "-trackB":
+        #     self.str = True
 
-        if inPrefix is None:
-            print("invalid arguments entered")
-            return
-            # self.usage()
+        self.resultFile = res_path
+        inPrefix = res_path.split("/")[-1].split("-")[0]
+        # print(inPrefix)
 
-        if resultFile is None:
-            PDFFile = inPrefix + ".pdf"
-            if str:
-                resultFile = inPrefix + "-str-result.xml"
-                GTFile = inPrefix + "-str.xml"
-            elif reg:
-                resultFile = inPrefix + "-reg-result.xml"
-                GTFile = inPrefix + "-reg.xml"
-            else:
-                resultFile = inPrefix + "-result.xml"
-                GTFile = inPrefix + ".xml"
+        if self.str:
+            self.GTFile = osj(self.str_gt_path, inPrefix + "-str.xml")
+        elif self.reg:
+            self.GTFile = osj(self.reg_gt_path, inPrefix + "-reg.xml")
         else:
-            if str:
-                GTFile = inPrefix + "-str.xml"
-            elif reg:
-                GTFile = inPrefix + "-reg.xml"
-            else:
-                GTFile = inPrefix + ".xml"
+            print("Not a valid track, please check your spelling.")
 
-            if PDFFile is None:
-                PDFFile = inPrefix + ".pdf"
+        # print("Using GTFile    : " + self.GTFile)
+        # print("Using resultFile: " + self.resultFile)
+        self.gene_ret_lst()
 
-        print("Using     GTFile: " + GTFile)
-        print("Using resultFile: " + resultFile)
-        print("Using    PDFFile: " + PDFFile)
+    @property
+    def result(self):
+        return self.return_result
 
-        final_gt_file = "./annotations/" + GTFile
-        gt_dom = xml.dom.minidom.parse(final_gt_file)
-        result_dom = xml.dom.minidom.parse(resultFile)
-        if not reg:
-            # TODO: pass-in iou value
-            self.evaluate_result_str(gt_dom, result_dom, 0.6)
+    def gene_ret_lst(self):
+        ret_lst = []
+        for iou in [0.6, 0.7, 0.8, 0.9]:
+            ret_lst.append(self.compute_retVal(iou))
+        print("done processing {}".format(self.resultFile))
+        self.return_result = ret_lst
+
+    def compute_retVal(self, iou):
+        gt_dom = xml.dom.minidom.parse(self.GTFile)
+        result_dom = xml.dom.minidom.parse(self.resultFile)
+        if self.reg:
+            ret = self.evaluate_result_reg(gt_dom, result_dom, iou)
+            # print("\nreg\nret")
+            # print("done processing {} (track A)".format(self.resultFile))
+            return ret
+        if self.str:
+            ret = self.evaluate_result_str(gt_dom, result_dom, iou)
+            # print("\nstr\nret")
+            # print("done processing {} (track B)\n".format(self.resultFile))
+            return ret
 
     # @staticmethod
     # # @param: gt_AR: Adj relations list for the ground truth file
@@ -132,7 +100,6 @@ class eval:
     #
     #     return retVal
 
-    # TODO: complete F1 calculation
     @staticmethod
     def evaluate_result_reg(gt_dom, result_dom, iou_value):
         # parse the tables in input elements
@@ -159,8 +126,10 @@ class eval:
                 if gtt.compute_table_iou(rest) > iou_value:
                     table_matches.append((gtt, rest))
                     remaining_tables.remove(rest)
-        print("\nfound matched table pairs: {}".format(len(table_matches)))
-        print("remaining_tables: {}\n".format(remaining_tables))
+        # print("\nfound matched table pairs: {}".format(len(table_matches)))
+
+        retVal = ResultStructure(truePos=len(table_matches), gtTotal=len(gt_tables), resTotal=len(result_tables))
+        return retVal
 
     @staticmethod
     def evaluate_result_str(gt_dom, result_dom, iou_value):
@@ -185,23 +154,26 @@ class eval:
         table_matches = []   # @param: table_matches - list of mapping of tables in gt and res file, in order (gt, res)
         for gtt in gt_tables:
             for rest in remaining_tables:
-                if gtt.compute_table_iou(rest) > iou_value:
+                # note: for structural analysis, use 0.8 for table mapping
+                if gtt.compute_table_iou(rest) > 0.8:
                     table_matches.append((gtt, rest))
                     remaining_tables.remove(rest)
-        print("\nfound matched table pairs: {}".format(len(table_matches)))
-        print("remaining_tables: {}\n".format(remaining_tables))
+        # print("\nfound matched table pairs: {}".format(len(table_matches)))
+        # print("False positive tables: {}\n".format(remaining_tables))
 
+        total_gt_relation, total_res_relation, total_correct_relation = 0, 0, 0
         for el in table_matches:
-            correct_dect = 0
             gt_table = el[0]
             ress_table = el[1]
 
             # set up the cell mapping for matching tables
             cell_mapping = gt_table.find_cell_mapping(ress_table, iou_value)
 
-            # set up the adj relations, convert the one for result table to a dictionary
+            # set up the adj relations, convert the one for result table to a dictionary for faster searching
             gt_AR = gt_table.find_adj_relations()
+            total_gt_relation += len(gt_AR)
             res_AR = ress_table.find_adj_relations()
+            total_res_relation += len(res_AR)
             res_AR.sort(key=lambda x: [x.fromText.start_row, x.fromText.start_col])
             res_ar_dict = {}
             for key, group in groupby(res_AR, key=lambda x: x.fromText):
@@ -210,6 +182,7 @@ class eval:
             # print(res_ar_dict)
             # print("", gt_AR, "\n", res_AR, "\n", cell_mapping, "\n")
 
+            correct_dect = 0
             # count the matched adj relations
             for ar in gt_AR:
                 target_cell_from = cell_mapping.get(ar.fromText)
@@ -220,7 +193,12 @@ class eval:
                     if target_relation.toText == target_cell_to and target_relation.direction == direction:
                         correct_dect += 1
                         break
-            print(correct_dect)
+            # print("found correct detection: {} for table {}".format(correct_dect, gt_table))
+            total_correct_relation += correct_dect
+
+        # print("total gt, res, corrrct: {}, {}, {}".format(total_gt_relation, total_res_relation, total_correct_relation))
+        retVal = ResultStructure(truePos=total_correct_relation, gtTotal=total_gt_relation, resTotal=total_res_relation)
+        return retVal
 
         # ==========================================================================================================
         # index = -1
@@ -284,7 +262,5 @@ class eval:
         #         print("False positive table found.")
 
 
-if __name__ == "__main__":
-    # resultFile = "./test2-result.xml"
-    # result = "test2"
-    eval("test1")
+# if __name__ == "__main__":
+#     eval("/Users/fang/PycharmProjects/performanceMeasure/test2-str-result.xml")
