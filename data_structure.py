@@ -58,7 +58,7 @@ class Cell(object):
     # @:param content: text content of the Cell
     # @:param cell_id: unique id of the Cell
 
-    def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content_box="", content=''):
+    def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content_box="", content=""):
         self._start_row = int(start_row)
         self._start_col = int(start_col)
         self._cell_box = cell_box
@@ -234,7 +234,10 @@ class Table:
             sc = cell.getAttribute("start-col")
             cell_id = cell.getAttribute("id")
             b_points = str(cell.getElementsByTagName("Coords")[0].getAttribute("points"))
-            text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
+            try:
+                text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
+            except AttributeError:
+                text = ""
             er = cell.getAttribute("end-row") if cell.hasAttribute("end-row") else -1
             ec = cell.getAttribute("end-col") if cell.hasAttribute("end-col") else -1
             new_cell = Cell(table_id=str(self.id), start_row=sr, start_col=sc, cell_box=b_points, content=text,
@@ -347,7 +350,6 @@ class Table:
 
                 self.found = True
                 self.adj_relations = retVal
-
                 return self.adj_relations
 
     # compute the IOU of table, pass-in var is another Table object
@@ -404,15 +406,15 @@ class ResultStructure:
         return "true: {}, gt: {}, res: {}".format(self._truePos, self._gtTotal, self._resTotal)
 
 
-if __name__ == "__main__":
-    resultFile = "./annotations/test_for_data_structure.xml"
-    res_dom = xml.dom.minidom.parse(resultFile)
-    res_root = res_dom.documentElement
-    res_tables = []
-    tables = res_root.getElementsByTagName("table")
-    print("processing... document " + resultFile)
-    for res_table in tables:
-        t = Table(res_table)
-        res_tables.append(t)
-    table1 = res_tables[0]
-    table1.find_adj_relations()
+# if __name__ == "__main__":
+#     resultFile = "./annotations/test_files/test_for_data_structure.xml"
+#     res_dom = xml.dom.minidom.parse(resultFile)
+#     res_root = res_dom.documentElement
+#     res_tables = []
+#     tables = res_root.getElementsByTagName("table")
+#     print("processing... document " + resultFile)
+#     for res_table in tables:
+#         t = Table(res_table)
+#         res_tables.append(t)
+#     table1 = res_tables[0]
+#     table1.find_adj_relations()

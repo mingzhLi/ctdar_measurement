@@ -5,8 +5,15 @@ from os.path import join as osj
 
 if __name__ == '__main__':
     # measure = eval(*sys.argv[1:])
+    reg_gt_path = os.path.abspath("./annotations/trackA/")
+    str_gt_path = os.path.abspath("./annotations/trackB/")
+    gt_file_lst = []
 
     track = sys.argv[1]
+    if track == "-trackA":
+        gt_file_lst = os.listdir(reg_gt_path)
+    elif track == "-trackB1" or track == "-trackB2":
+        gt_file_lst = os.listdir(str_gt_path)
     result_path = sys.argv[2]
     untar_path = "./untar_file/"
     if not os.path.exists(untar_path):
@@ -25,20 +32,20 @@ if __name__ == '__main__':
             if name.split(".")[-1] == "xml":
                 cur_filepath = osj(os.path.abspath(root), name)
                 res_lst.append(eval(track, cur_filepath))
-
     print("\n")
 
-    # note: results are stored as list of each when iou at [0.6, 0.7, 0.8, 0.9]
+    # note: results are stored as list of each when iou at [0.6, 0.7, 0.8, 0.9, gt_filename]
     correct_six, gt_six, res_six = 0, 0, 0
     correct_seven, gt_seven, res_seven = 0, 0, 0
     correct_eight, gt_eight, res_eight = 0, 0, 0
     correct_nine, gt_nine, res_nine = 0, 0, 0
 
     for each_file in res_lst:
-        # print(each_file.result)
+        # print(each_file.result[-1])
         # for el in each_file.result:
         #     print(el)
 
+        gt_file_lst.remove(each_file.result[-1])
         correct_six += each_file.result[0].truePos
         gt_six += each_file.result[0].gtTotal
         res_six += each_file.result[0].resTotal
@@ -79,6 +86,9 @@ if __name__ == '__main__':
     r_nine = correct_nine / gt_nine
     f1_nine = 2 * p_nine * r_nine / (p_nine + r_nine)
     print("IOU @ 0.9 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_nine, r_nine, f1_nine))
+
+    if len(gt_file_lst) > 0:
+        print("\nMissing result annotations for file: {}".format(gt_file_lst))
 
 
 

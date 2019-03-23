@@ -31,13 +31,13 @@ class eval:
         #     self.str = True
 
         self.resultFile = res_path
-        inPrefix = res_path.split("/")[-1].split("-")[0]
+        self.inPrefix = os.path.split(res_path)[-1].split("-")[0]
         # print(inPrefix)
 
         if self.str:
-            self.GTFile = osj(self.str_gt_path, inPrefix + "-str.xml")
+            self.GTFile = osj(self.str_gt_path, self.inPrefix + "-str.xml")
         elif self.reg:
-            self.GTFile = osj(self.reg_gt_path, inPrefix + "-reg.xml")
+            self.GTFile = osj(self.reg_gt_path, self.inPrefix + "-reg.xml")
         else:
             print("Not a valid track, please check your spelling.")
 
@@ -53,6 +53,10 @@ class eval:
         ret_lst = []
         for iou in [0.6, 0.7, 0.8, 0.9]:
             ret_lst.append(self.compute_retVal(iou))
+        if self.str:
+            ret_lst.append(self.inPrefix + "-str.xml")
+        elif self.reg:
+            ret_lst.append(self.inPrefix + "-reg.xml")
         print("done processing {}".format(self.resultFile))
         self.return_result = ret_lst
 

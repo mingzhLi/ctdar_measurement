@@ -59,7 +59,8 @@
 		<!--</cell>-->
 		<cell end-col="4" end-row="3" id="12" start-col="4" start-row="3">
 			<Coords points="316,442 316,453 338,453 338,442"/>
-			<content>4-5</content>
+			<!--<content>4-5</content>-->
+			<content></content>
 		</cell>
     </table>
 
