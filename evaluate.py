@@ -63,30 +63,33 @@ if __name__ == '__main__':
         gt_nine += each_file.result[3].gtTotal
         res_nine += each_file.result[3].resTotal
 
-    print("Evaluation of {}".format(track.replace("-", "")))
-    # iou @ 0.6
-    p_six = correct_six / res_six
-    r_six = correct_six / gt_six
-    f1_six = 2 * p_six * r_six / (p_six + r_six)
-    print("IOU @ 0.6 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_six, r_six, f1_six))
+    try:
+        print("Evaluation of {}".format(track.replace("-", "")))
+        # iou @ 0.6
+        p_six = correct_six / res_six
+        r_six = correct_six / gt_six
+        f1_six = 2 * p_six * r_six / (p_six + r_six)
+        print("IOU @ 0.6 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_six, r_six, f1_six))
 
-    # iou @ 0.7
-    p_seven = correct_seven / res_seven
-    r_seven = correct_seven / gt_seven
-    f1_seven = 2 * p_seven * r_seven / (p_seven + r_seven)
-    print("IOU @ 0.7 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_seven, r_seven, f1_seven))
+        # iou @ 0.7
+        p_seven = correct_seven / res_seven
+        r_seven = correct_seven / gt_seven
+        f1_seven = 2 * p_seven * r_seven / (p_seven + r_seven)
+        print("IOU @ 0.7 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_seven, r_seven, f1_seven))
 
-    # iou @ 0.8
-    p_eight = correct_eight / res_eight
-    r_eight = correct_eight / gt_eight
-    f1_eight = 2 * p_eight * r_eight / (p_eight + r_eight)
-    print("IOU @ 0.8 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_eight, r_eight, f1_eight))
+        # iou @ 0.8
+        p_eight = correct_eight / res_eight
+        r_eight = correct_eight / gt_eight
+        f1_eight = 2 * p_eight * r_eight / (p_eight + r_eight)
+        print("IOU @ 0.8 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_eight, r_eight, f1_eight))
 
-    # iou @ 0.9
-    p_nine = correct_nine / res_nine
-    r_nine = correct_nine / gt_nine
-    f1_nine = 2 * p_nine * r_nine / (p_nine + r_nine)
-    print("IOU @ 0.9 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_nine, r_nine, f1_nine))
+        # iou @ 0.9
+        p_nine = correct_nine / res_nine
+        r_nine = correct_nine / gt_nine
+        f1_nine = 2 * p_nine * r_nine / (p_nine + r_nine)
+        print("IOU @ 0.9 :\nprecision: {}\nrecall: {}\nf1: {}\n".format(p_nine, r_nine, f1_nine))
+    except ZeroDivisionError:
+        print("Error: no adjacency relations are found, please check the file input.")
 
     if len(gt_file_lst) > 0:
         print("\nMissing result annotations for file: {}".format(gt_file_lst))

@@ -348,10 +348,10 @@ class Table:
                         repeat = True
                         retVal.remove(duplicates[0])
 
-                # print out the relations for test
-                print("found {} relations in table {}:".format(len(retVal), self.id))
-                for ret in retVal:
-                    print(ret)
+                # # print out the relations for test
+                # print("found {} relations in table {}:".format(len(retVal), self.id))
+                # for ret in retVal:
+                #     print(ret)
 
                 self.found = True
                 self.adj_relations = retVal
@@ -411,15 +411,15 @@ class ResultStructure:
         return "true: {}, gt: {}, res: {}".format(self._truePos, self._gtTotal, self._resTotal)
 
 
-if __name__ == "__main__":
-    resultFile = "./annotations/test_files/test_for_data_structure.xml"
-    res_dom = xml.dom.minidom.parse(resultFile)
-    res_root = res_dom.documentElement
-    res_tables = []
-    tables = res_root.getElementsByTagName("table")
-    print("processing... document " + resultFile)
-    for res_table in tables:
-        t = Table(res_table)
-        res_tables.append(t)
-    table1 = res_tables[0]
-    table1.find_adj_relations()
+# if __name__ == "__main__":
+#     resultFile = "./annotations/test_files/test_for_data_structure.xml"
+#     res_dom = xml.dom.minidom.parse(resultFile)
+#     res_root = res_dom.documentElement
+#     res_tables = []
+#     tables = res_root.getElementsByTagName("table")
+#     print("processing... document " + resultFile)
+#     for res_table in tables:
+#         t = Table(res_table)
+#         res_tables.append(t)
+#     table1 = res_tables[0]
+#     table1.find_adj_relations()

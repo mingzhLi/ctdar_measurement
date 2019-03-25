@@ -65,13 +65,9 @@ class eval:
         result_dom = xml.dom.minidom.parse(self.resultFile)
         if self.reg:
             ret = self.evaluate_result_reg(gt_dom, result_dom, iou)
-            # print("\nreg\nret")
-            # print("done processing {} (track A)".format(self.resultFile))
             return ret
         if self.str:
             ret = self.evaluate_result_str(gt_dom, result_dom, iou)
-            # print("\nstr\nret")
-            # print("done processing {} (track B)\n".format(self.resultFile))
             return ret
 
     # @staticmethod
@@ -192,7 +188,8 @@ class eval:
                 target_cell_from = cell_mapping.get(ar.fromText)
                 target_cell_to = cell_mapping.get(ar.toText)
                 direction = ar.direction    # DIR_HORIZ = 1 / DIR_VERT = 2
-
+                if (target_cell_from is None) or (target_cell_to is None):
+                    continue
                 for target_relation in res_ar_dict.get(target_cell_from):
                     if target_relation.toText == target_cell_to and target_relation.direction == direction:
                         correct_dect += 1
@@ -266,5 +263,5 @@ class eval:
         #         print("False positive table found.")
 
 
-if __name__ == "__main__":
-    eval("-trackA", "/Users/fang/PycharmProjects/performanceMeasure/annotations/test_files/polygon-reg-result.xml")
+# if __name__ == "__main__":
+#     eval("-trackB1", "/Users/fang/PycharmProjects/performanceMeasure/annotations/test_files/test3-str-result.xml")
