@@ -18,11 +18,12 @@ def flatten(lis):
 
 # derived from https://blog.csdn.net/u012433049/article/details/82909484
 def compute_poly_iou(list1, list2):
-    a = np.array(list1, dtype=int).reshape(4, 2)
+    lst_len = int(len(list1)/2)
+    a = np.array(list1, dtype=int).reshape(lst_len, 2)
     poly1 = Polygon(a).convex_hull
     # print(poly1)
 
-    b = np.array(list2, dtype=int).reshape(4, 2)
+    b = np.array(list2, dtype=int).reshape(lst_len, 2)
     poly2 = Polygon(b).convex_hull
     # print(poly2)
 
@@ -287,9 +288,11 @@ class Table:
                     for c_from in range(self._maxCol):
                         if tab[r][c_from] == 0:
                             continue
+                        elif tab[r][c_from].content == '':
+                            continue
                         else:
                             c_to = c_from + 1
-                            if tab[r][c_to] != 0:
+                            if tab[r][c_to] != 0 and tab[r][c_to] != '':
                                 # find relation between two adjacent cells
                                 if tab[r][c_from] != tab[r][c_to]:
                                     adj_relation = AdjRelation(tab[r][c_from], tab[r][c_to], AdjRelation.DIR_HORIZ)
@@ -297,7 +300,7 @@ class Table:
                             else:
                                 # find the next non-blank cell, if exists
                                 for temp in range(c_from + 1, self._maxCol + 1):
-                                    if tab[r][temp] != 0:
+                                    if tab[r][temp] != 0 and tab[r][temp].content != '':
                                         adj_relation = AdjRelation(tab[r][c_from], tab[r][temp], AdjRelation.DIR_HORIZ)
                                         retVal.append(adj_relation)
                                         break
@@ -307,9 +310,11 @@ class Table:
                     for r_from in range(self._maxRow):
                         if tab[r_from][c] == 0:
                             continue
+                        elif tab[r_from][c].content == '':
+                            continue
                         else:
                             r_to = r_from + 1
-                            if tab[r_to][c] != 0:
+                            if tab[r_to][c] != 0 and tab[r_to][c].content != '':
                                 # find relation between two adjacent cells
                                 if tab[r_from][c] != tab[r_to][c]:
                                     adj_relation = AdjRelation(tab[r_from][c], tab[r_to][c], AdjRelation.DIR_VERT)
@@ -317,7 +322,7 @@ class Table:
                             else:
                                 # find the next non-blank cell, if exists
                                 for temp in range(r_from + 1, self._maxRow + 1):
-                                    if tab[temp][c] != 0:
+                                    if tab[temp][c] != 0 and tab[temp][c].content != '':
                                         adj_relation = AdjRelation(tab[r_from][c], tab[temp][c], AdjRelation.DIR_VERT)
                                         retVal.append(adj_relation)
                                         break
@@ -343,10 +348,10 @@ class Table:
                         repeat = True
                         retVal.remove(duplicates[0])
 
-                # # print out the relations for test
-                # print("found {} relations in table {}:".format(len(retVal), self.id))
-                # for ret in retVal:
-                #     print(ret)
+                # print out the relations for test
+                print("found {} relations in table {}:".format(len(retVal), self.id))
+                for ret in retVal:
+                    print(ret)
 
                 self.found = True
                 self.adj_relations = retVal
@@ -406,15 +411,15 @@ class ResultStructure:
         return "true: {}, gt: {}, res: {}".format(self._truePos, self._gtTotal, self._resTotal)
 
 
-# if __name__ == "__main__":
-#     resultFile = "./annotations/test_files/test_for_data_structure.xml"
-#     res_dom = xml.dom.minidom.parse(resultFile)
-#     res_root = res_dom.documentElement
-#     res_tables = []
-#     tables = res_root.getElementsByTagName("table")
-#     print("processing... document " + resultFile)
-#     for res_table in tables:
-#         t = Table(res_table)
-#         res_tables.append(t)
-#     table1 = res_tables[0]
-#     table1.find_adj_relations()
+if __name__ == "__main__":
+    resultFile = "./annotations/test_files/test_for_data_structure.xml"
+    res_dom = xml.dom.minidom.parse(resultFile)
+    res_root = res_dom.documentElement
+    res_tables = []
+    tables = res_root.getElementsByTagName("table")
+    print("processing... document " + resultFile)
+    for res_table in tables:
+        t = Table(res_table)
+        res_tables.append(t)
+    table1 = res_tables[0]
+    table1.find_adj_relations()

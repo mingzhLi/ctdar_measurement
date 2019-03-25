@@ -266,5 +266,5 @@ class eval:
         #         print("False positive table found.")
 
 
-# if __name__ == "__main__":
-#     eval("/Users/fang/PycharmProjects/performanceMeasure/test2-str-result.xml")
+if __name__ == "__main__":
+    eval("-trackA", "/Users/fang/PycharmProjects/performanceMeasure/annotations/test_files/polygon-reg-result.xml")

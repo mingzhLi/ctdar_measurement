@@ -32,6 +32,7 @@ if __name__ == '__main__':
             if name.split(".")[-1] == "xml":
                 cur_filepath = osj(os.path.abspath(root), name)
                 res_lst.append(eval(track, cur_filepath))
+                print(cur_filepath)
     print("\n")
 
     # note: results are stored as list of each when iou at [0.6, 0.7, 0.8, 0.9, gt_filename]
