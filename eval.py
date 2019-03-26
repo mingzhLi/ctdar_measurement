@@ -99,22 +99,20 @@ class eval:
     #     #     print(el)
     #
     #     return retVal
+    
+    @staticmethod
+    def get_table_list(dom):
+        """
+        return a list of Table objects corresponding to the table element of the DOM.
+        """
+        return [Table(_nd) for _nd in dom.documentElement.getElementsByTagName("table")]
+        
 
     @staticmethod
     def evaluate_result_reg(gt_dom, result_dom, iou_value):
         # parse the tables in input elements
-        gt_tables = []  # @param: gt_tables - Tables in Ground Truth File
-        gt_root = gt_dom.documentElement
-        gt_table_nodes = gt_root.getElementsByTagName("table")
-        for tab in gt_table_nodes:
-            gt_tables.append(Table(tab))
-
-        # parse the tables in result elements
-        result_tables = []  # @param: result_tables - Tables in Result File
-        result_root = result_dom.documentElement
-        res_table_nodes = result_root.getElementsByTagName("table")
-        for tab in res_table_nodes:
-            result_tables.append(Table(tab))
+        gt_tables     = eval.get_table_list(gt_dom)
+        result_tables = eval.get_table_list(result_dom)
 
         # duplicate result table list
         remaining_tables = result_tables.copy()
@@ -140,20 +138,10 @@ class eval:
         return retVal
 
     @staticmethod
-    def evaluate_result_str(gt_dom, result_dom, iou_value):
+    def evaluate_result_str(gt_dom, result_dom, iou_value, table_iou_value=0.8):
         # parse the tables in input elements
-        gt_tables = []    # @param: gt_tables - Tables in Ground Truth File
-        gt_root = gt_dom.documentElement
-        gt_table_nodes = gt_root.getElementsByTagName("table")
-        for tab in gt_table_nodes:
-            gt_tables.append(Table(tab))
-
-        # parse the tables in result elements
-        result_tables = []    # @param: result_tables - Tables in Result File
-        result_root = result_dom.documentElement
-        res_table_nodes = result_root.getElementsByTagName("table")
-        for tab in res_table_nodes:
-            result_tables.append(Table(tab))
+        gt_tables     = eval.get_table_list(gt_dom)
+        result_tables = eval.get_table_list(result_dom)
 
         # duplicate result table list
         remaining_tables = result_tables.copy()
@@ -163,20 +151,18 @@ class eval:
         for gtt in gt_tables:
             for rest in remaining_tables:
                 # note: for structural analysis, use 0.8 for table mapping
-                if gtt.compute_table_iou(rest) >= 0.8:
+                if gtt.compute_table_iou(rest) >= table_iou_value:
                     table_matches.append((gtt, rest))
                     remaining_tables.remove(rest)
+                    break
         # print("\nfound matched table pairs: {}".format(len(table_matches)))
         # print("False positive tables: {}\n".format(remaining_tables))
 
         total_gt_relation, total_res_relation, total_correct_relation = 0, 0, 0
-        for el in table_matches:
-            gt_table = el[0]
-            ress_table = el[1]
+        for gt_table, ress_table in table_matches:
 
             # set up the cell mapping for matching tables
             cell_mapping = gt_table.find_cell_mapping(ress_table, iou_value)
-
             # set up the adj relations, convert the one for result table to a dictionary for faster searching
             gt_AR = gt_table.find_adj_relations()
             total_gt_relation += len(gt_AR)
