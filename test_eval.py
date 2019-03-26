@@ -9,6 +9,8 @@ pytest test_eval.py
     or
 python -mpytest test_eval.py
 
+(you need to add pytest to your Python installation)
+
 JL Meunier - March 2019
 Naver Labs Europe
 """
@@ -59,6 +61,7 @@ def _rectangle(w, h, x0=0, y0=0):
 # -----------------------------------------------------------------------
 def test_reg_simple():
     """
+    a square compared to itself
     """
     for IoU in [0.1, 0.5, 0.9, 1.0]:
         assert _regEval( _rectangle(100, 100)
@@ -80,6 +83,11 @@ def test_reg_simple():
     assert _regEval( GT, _rectangle(100, 91)  
                     , 0.9) == (1, 0, 0)
                     
+def test_reg_quarter():
+    """
+    a square compared to its quarter
+    """
+    GT = _rectangle(100, 100)
     assert _regEval( GT, _rectangle(50, 50)  
                     , 0.9) == (0, 1, 1)
     assert _regEval( GT, _rectangle(50, 50)  
