@@ -14,38 +14,17 @@ def flatten(lis):
         else:
             yield item
 
-
 # derived from https://blog.csdn.net/u012433049/article/details/82909484
 def compute_poly_iou(list1, list2):
-    lst_len_a = int(len(list1)/2)
-    a = np.array(list1, dtype=int).reshape(lst_len_a, 2)
-    poly1 = Polygon(a).convex_hull
-    # print(poly1)
+    a1 = np.array(list1, dtype=int).reshape(-1, 2)
+    poly1 = Polygon(a1)
+    a2 = np.array(list2, dtype=int).reshape(-1, 2)
+    poly2 = Polygon(a2)
 
-    lst_len_b = int(len(list2) / 2)
-    b = np.array(list2, dtype=int).reshape(lst_len_b, 2)
-    poly2 = Polygon(b).convex_hull
-    # print(poly2)
-
-    union_poly = np.concatenate((a, b))
-    # print(MultiPoint(union_poly).convex_hull)
-
-    if not poly1.intersects(poly2):  # if the two poly does not intersects, set iou to be 0
+    try:
+        iou = poly1.intersection(poly2).area / poly1.union(poly2).area
+    except ZeroDivisionError:
         iou = 0
-    else:
-        try:
-            inter_area = poly1.intersection(poly2).area  # area of intersection
-            # print(inter_area)
-            union_area = MultiPoint(union_poly).convex_hull.area
-            # print(union_area)
-            if union_area == 0:
-                iou = 0
-            iou = float(inter_area) / union_area
-            # iou = float(inter_area) / (poly1.area + poly2.area - inter_area)
-        except Exception:
-            # print('error, iou set to 0.')
-            iou = 0
-    # print(iou)
     return iou
 
 
@@ -383,7 +362,7 @@ class Table:
         mapped_cell = []    # store the matches as tuples - (gt, result) mind the order of table when passing in
         for cell_1 in self.table_cells:
             for cell_2 in target_table.table_cells:
-                if cell_1.compute_cell_iou(cell_2) > iou_value:
+                if cell_1.compute_cell_iou(cell_2) >= iou_value:
                     mapped_cell.append((cell_1, cell_2))
                     continue
         ret = dict(mapped_cell)

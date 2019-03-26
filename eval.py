@@ -123,7 +123,7 @@ class eval:
         table_matches = []  # @param: table_matches - list of mapping of tables in gt and res file, in order (gt, res)
         for gtt in gt_tables:
             for rest in remaining_tables:
-                if gtt.compute_table_iou(rest) > iou_value:
+                if gtt.compute_table_iou(rest) >= iou_value:
                     table_matches.append((gtt, rest))
                     remaining_tables.remove(rest)
         # print("\nfound matched table pairs: {}".format(len(table_matches)))
@@ -155,7 +155,7 @@ class eval:
         for gtt in gt_tables:
             for rest in remaining_tables:
                 # note: for structural analysis, use 0.8 for table mapping
-                if gtt.compute_table_iou(rest) > 0.8:
+                if gtt.compute_table_iou(rest) >= 0.8:
                     table_matches.append((gtt, rest))
                     remaining_tables.remove(rest)
         # print("\nfound matched table pairs: {}".format(len(table_matches)))
