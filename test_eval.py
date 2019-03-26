@@ -39,23 +39,29 @@ def _regEval(gt_dom, result_dom, iou_value):
     # print(o)
     return OkErrMiss(o)
     
-def _rectangle(w, h, x0=0, y0=0):
+def _rectangle(w, h, x0=0, y0=0, bClosed=True):
     """
     create a rectangle with bottom left corner at 0,0 or at x,y if given
     
-    the list of coordinates is closed (start==end)
+    the list of coordinates is closed (start==end) if bClosed is True
     return the corresponding DOM
     """
     
     assert w > 0
     assert h > 0
+    if bClosed:
+        #close the list of coordinates
+        sPoints = "%d,%d %d,%d %d,%d %d,%d %d,%d" % (x0,y0 , x0+w,y0 , x0+w,y0+h , x0,y0+h , x0,y0)
+    else:
+        sPoints = "%d,%d %d,%d %d,%d %d,%d"       % (x0,y0 , x0+w,y0 , x0+w,y0+h , x0,y0+h)
+        
     sXml = """<?xml version="1.0" encoding="UTF-8"?>
 <document filename="table1.jpg">
     <table>
-        <Coords points="%d,%d %d,%d %d,%d %d,%d  %d,%d"/>
+        <Coords points="%s"/>
     </table>
 </document>
-""" % (x0,y0 , x0+w,y0 , x0+w,y0+h , x0,y0+h, x0,y0)
+""" % (sPoints)
     return xml.dom.minidom.parseString(sXml)
 
 # -----------------------------------------------------------------------
@@ -63,26 +69,30 @@ def test_reg_simple():
     """
     a square compared to itself
     """
-    for IoU in [0.1, 0.5, 0.9, 1.0]:
-        assert _regEval( _rectangle(100, 100)
-                       , _rectangle(100, 100)
-                       , 0.9) == (1, 0, 0)
-    
-    GT = _rectangle(100, 100)
-    assert _regEval( GT, _rectangle(89, 100)  # NOTE: why > instead of >= ?
-                    , 0.9) == (0, 1, 1)
-    assert _regEval( GT, _rectangle(90, 100)  # NOTE: why > instead of >= ?
-                    , 0.9) == (0, 1, 1)
-    assert _regEval( GT, _rectangle(91, 100)
-                    , 0.9) == (1, 0, 0)
-    
-    assert _regEval( GT, _rectangle(100, 89)  # NOTE: why > instead of >= ?
-                    , 0.9) == (0, 1, 1)
-    assert _regEval( GT, _rectangle(100, 90)  # NOTE: why > instead of >= ?
-                    , 0.9) == (0, 1, 1)
-    assert _regEval( GT, _rectangle(100, 91)  
-                    , 0.9) == (1, 0, 0)
-                    
+    for bClosedCoords in [True, False]:
+        for IoU in [0.1, 0.5, 0.9, 1.0]:
+            assert _regEval( _rectangle(100, 100, bClosed=bClosedCoords)
+                           , _rectangle(100, 100)
+                           , 0.9) == (1, 0, 0)
+        
+        GT = _rectangle(100, 100, bClosed=bClosedCoords)
+        assert _regEval( GT, _rectangle(89, 100)
+                        , 0.89) == (1, 0, 0)
+        assert _regEval( GT, _rectangle(89, 100)
+                        , 0.9) == (0, 1, 1)
+        assert _regEval( GT, _rectangle(90, 100)
+                        , 0.9) == (1, 0, 0)
+        assert _regEval( GT, _rectangle(91, 100)
+                        , 0.9) == (1, 0, 0)
+        
+        assert _regEval( GT, _rectangle(100, 89)
+                        , 0.9) == (0, 1, 1)
+        assert _regEval( GT, _rectangle(100, 90)
+                        , 0.9) == (1, 0, 0)
+        assert _regEval( GT, _rectangle(100, 91)  
+                        , 0.9) == (1, 0, 0)
+
+
 def test_reg_quarter():
     """
     a square compared to its quarter
@@ -93,7 +103,7 @@ def test_reg_quarter():
     assert _regEval( GT, _rectangle(50, 50)  
                     , 0.24) == (1, 0, 0)
     assert _regEval( GT, _rectangle(50, 50)  
-                    , 0.25) == (0, 1, 1)
+                    , 0.25) == (1, 0, 0)
 
 #     assert _regEval( GT, _rectangle(100, 100, x0=-50, y0=-50)  
 #                     , 0.9) == (0, 1, 1)
@@ -105,19 +115,21 @@ def test_reg_quarter():
     GT = _rectangle(100, 100, x0=50, y0=50)
     assert _regEval( GT, _rectangle(100, 100)  
                     , 0.9) == (0, 1, 1)
+    iou = 50*50 / (7 * 50*50)
+    print("expected=", iou)
     assert _regEval( GT, _rectangle(100, 100)  # BUG maybe??
-                    , 0.20) == (1, 0, 0)
+                    , iou + 0.01) == (0, 1, 1)
     assert _regEval( GT, _rectangle(100, 100)  # BUG maybe??
-                    , 0.24) == (1, 0, 0)
-    assert _regEval( GT, _rectangle(100, 100)  
-                    , 0.25) == (0, 1, 1)
+                    , iou - 0.01) == (1, 0, 0)
+#     assert _regEval( GT, _rectangle(100, 100)  
+#                     , 0.25) == (1, 0, 0)
     GT = _rectangle(100, 100)
     
     
 
 if __name__ == "__main__":
     # to test manually some code...
-    test_reg()
+    test_reg_quarter()
     
     
     
