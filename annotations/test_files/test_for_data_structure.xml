@@ -17,7 +17,7 @@
 		</cell>
 		<cell end-col="3" end-row="0" id="3" start-col="3" start-row="0">
 			<Coords points="254,442 254,453 300,453 300,442"/>
-			<content>1-4</content>
+			<!--<content>1-4</content>-->
 		</cell>
 		<cell end-col="4" end-row="0" id="4" start-col="4" start-row="0">
 			<Coords points="316,442 316,453 338,453 338,442"/>

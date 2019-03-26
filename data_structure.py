@@ -1,5 +1,4 @@
 import xml.dom.minidom
-import itertools
 import os
 from shapely.geometry import Polygon, MultiPoint
 import numpy as np
@@ -19,7 +18,6 @@ def flatten(lis):
 def compute_poly_iou(list1, list2):
     a1 = np.array(list1, dtype=int).reshape(-1, 2)
     poly1 = Polygon(a1)
-
     a2 = np.array(list2, dtype=int).reshape(-1, 2)
     poly2 = Polygon(a2)
 
@@ -217,8 +215,11 @@ class Table:
             cell_id = cell.getAttribute("id")
             b_points = str(cell.getElementsByTagName("Coords")[0].getAttribute("points"))
             try:
-                text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
-            except AttributeError:
+                try:
+                    text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
+                except AttributeError:
+                    text = ""
+            except IndexError:
                 text = ""
             er = cell.getAttribute("end-row") if cell.hasAttribute("end-row") else -1
             ec = cell.getAttribute("end-col") if cell.hasAttribute("end-col") else -1
