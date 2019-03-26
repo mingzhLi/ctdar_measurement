@@ -39,7 +39,15 @@ def _regEval(gt_dom, result_dom, iou_value):
     # print(o)
     return OkErrMiss(o)
     
-def _rectangle(w, h, x0=0, y0=0, bClosed=True):
+def _strEval(gt_dom, result_dom, iou_value):
+    """
+    encapsulate the evaluate_result_str to return ok, err, miss
+    """
+    o = eval.evaluate_result_str(gt_dom, result_dom, iou_value)
+    # print(o)
+    return OkErrMiss(o)
+    
+def _rectangle(w, h, x0=0, y0=0, bClosed=True, sXmlCells=None):
     """
     create a rectangle with bottom left corner at 0,0 or at x,y if given
     
@@ -54,7 +62,7 @@ def _rectangle(w, h, x0=0, y0=0, bClosed=True):
 <document filename="table1.jpg">
     %s
 </document>
-""" % _table(x0, y0, w, h, bClosed)
+""" % _table_xml(x0, y0, w, h, bClosed, sXmlCells=sXmlCells)
     return xml.dom.minidom.parseString(sXml)
 
 def _multi_rectangle(lxywh):
@@ -64,7 +72,7 @@ def _multi_rectangle(lxywh):
     sXmlTable = ""
     for x,y,w,h in lxywh:
         assert w > 0 and h > 0
-        sXmlTable += "\n%s" % _table(x, y, w, h, False)
+        sXmlTable += "\n%s" % _table_xml(x, y, w, h, False)
         
     sXml = """<?xml version="1.0" encoding="UTF-8"?>
 <document filename="table1.jpg">
@@ -74,7 +82,7 @@ def _multi_rectangle(lxywh):
 
     return xml.dom.minidom.parseString(sXml)    
 
-def _table(x, y, w, h, bClosed=True):
+def _table_xml(x, y, w, h, bClosed=True, sXmlCells=None):
     """
     XML Table element as a string
     """
@@ -84,12 +92,29 @@ def _table(x, y, w, h, bClosed=True):
     else:
         sPoints = "%d,%d %d,%d %d,%d %d,%d"       % (x,y , x+w,y , x+w,y+h , x,y+h)
     
+    if sXmlCells is None:
+        sXmlCells = """<cell start-row='0' start-col='0' end-row='1' end-col='2'>
+<Coords points="180,160 177,456 614,456 615,163"/>
+</cell>"""
+
     sXml = """
     <table>
         <Coords points="%s"/>
+        %s
     </table>
-    """ % (sPoints)
+    """ % (sPoints, sXmlCells)
     return sXml
+
+
+def _cell_xml(sr, sc, er, ec, sPointXml, bFilled=True):
+    if bFilled:
+        sContent = "<content><xx>%d_%d_%d_%d_%s</xx></content>"%(sr, sc, er, ec, sPointXml)
+    else:
+        sContent = ""
+    return """<cell start-row='%d' start-col='%d' end-row='%d' end-col='%d'>
+<Coords points="%s"/>
+%s
+</cell>""" % (sr, sc, er, ec, sPointXml, sContent)
 
 # -----------------------------------------------------------------------
 def test_reg_simple():
@@ -237,10 +262,45 @@ def test_multi_table():
     res = _regEval( GT, RUN, iou1+0.01)
     assert res == (2, 1, 0), res
 
+# ----------------------------------------------------------------------
+# table recognition
+def test_table_recognition_obvious():
+    
+    sXmlCells = " ".join([  _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70")
+                         , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70")
+                         ])
+    GT  = _rectangle(100, 100, sXmlCells=sXmlCells)
+    res = _strEval(GT, GT, 0.85)
+    assert res == (1, 0, 0), res
+
+    
+def test_table_recognition_simple():
+    # in the run, we might have no content in the cells
+    sXmlCells = " ".join([  _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70")
+                         , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70")
+                         ])
+    GT  = _rectangle(100, 100, sXmlCells=sXmlCells)
+
+    for bCellContent in [True, False]:
+        print(bCellContent)
+        sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", bCellContent)
+                                , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70", bCellContent)
+                             ])
+        RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (1, 0, 0), (bContent, res)    # 0.95 is for cells not table!
+        res = _strEval(GT, RUN, 0.85)
+        assert res == (1, 0, 0), (bContent, res)
+        print("ok for bCellContent=", bCellContent)
+    
+    # FAILURE WHEN bCellCOntent is False
+
+# ----------------------------------------------------------------------
 if __name__ == "__main__":
     # to test manually some code...
     # test_reg_quarter()
-    test_multi_table()
+    # test_multi_table()
+    test_table_recognition_simple()
     
     
     
