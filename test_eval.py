@@ -226,7 +226,7 @@ def test_multi_table():
     res = _regEval( GT, RUN, 1.0)
     assert res == (2, 1, 0), res
     res = _regEval( GT, RUN, 0.01)
-    assert res == (2, 0, 0), res    # AssertionError: (3, 0, -1)
+    assert res == (2, 1, 0), res
     res = _regEval( GT, RUN, iou2-0.01)
     assert res == (2, 1, 0), res
     res = _regEval( GT, RUN, iou2+0.01)

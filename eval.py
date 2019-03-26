@@ -124,10 +124,18 @@ class eval:
         for gtt in gt_tables:
             for rest in remaining_tables:
                 if gtt.compute_table_iou(rest) >= iou_value:
-                    table_matches.append((gtt, rest))
                     remaining_tables.remove(rest)
-        # print("\nfound matched table pairs: {}".format(len(table_matches)))
+                    table_matches.append((gtt, rest))
+                    break
+                    # JL: here I force to stop the match of gtt to the predicted tables
+                    # because we do not want multiple matches.
+                    # since iou_value > 0.5, the first match is teh best unless the predicted tables ovrlap each other
+                    # In that case, the competitor might get poor score, but their output was crap anyway.
 
+        # print("\nfound matched table pairs: {}".format(len(table_matches)))
+        assert len(table_matches) <= len(gt_tables)
+        assert len(table_matches) <= len(result_tables)
+        
         retVal = ResultStructure(truePos=len(table_matches), gtTotal=len(gt_tables), resTotal=len(result_tables))
         return retVal
 
