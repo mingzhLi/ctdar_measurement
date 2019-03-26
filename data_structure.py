@@ -364,7 +364,7 @@ class Table:
             for cell_2 in target_table.table_cells:
                 if cell_1.compute_cell_iou(cell_2) >= iou_value:
                     mapped_cell.append((cell_1, cell_2))
-                    continue
+                    break
         ret = dict(mapped_cell)
         # print(ret)
         return ret
