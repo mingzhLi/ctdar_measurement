@@ -301,8 +301,7 @@ if __name__ == "__main__":
     # test_reg_quarter()
     # test_multi_table()
     test_table_recognition_simple()
-    
-    
+
     
     
     

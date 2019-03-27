@@ -1,3 +1,10 @@
+"""
+Evaluation of -.tar.gz file.
+
+Yu Fang - March 2019
+"""
+
+
 from eval import *
 import os, sys, glob
 import shutil

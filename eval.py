@@ -1,3 +1,9 @@
+"""
+Evaluation of single result file.
+
+Yu Fang - March 2019
+"""
+
 import os, glob, sys
 import xml.dom.minidom
 # from functools import cmp_to_key

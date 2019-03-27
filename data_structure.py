@@ -1,3 +1,9 @@
+"""
+Data structures used by the evaluation process.
+
+Yu Fang - March 2019
+"""
+
 import xml.dom.minidom
 import os
 from shapely.geometry import Polygon, MultiPoint
@@ -38,12 +44,12 @@ class Cell(object):
     # @:param content: text content of the Cell
     # @:param cell_id: unique id of the Cell
 
-    def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content_box="", content=""):
+    def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content_box=""):
         self._start_row = int(start_row)
         self._start_col = int(start_col)
         self._cell_box = cell_box
         self._content_box = content_box
-        self._content = content
+        # self._content = content
         self._table_id = table_id    # the table_id this cell belongs to
         # self._cell_name = cell_id    # specify the cell using passed-in cell_id
         self._cell_id = id(self)
@@ -91,14 +97,14 @@ class Cell(object):
     def table_id(self):
         return self._table_id
 
-    @property
-    def content(self):
-        return self._content
+    # @property
+    # def content(self):
+    #     return self._content
 
     def __str__(self):
         return 'CELL object - start_row: ' + str(self.start_row) + ' end_row: ' + str(self.end_row) + ' start_col: ' + \
-               str(self.start_col) + ' end_col: ' + str(self.end_col) + '    ' + self.content
-        # return 'CELL object - table_id: ' + str(self.table_id) + ' cell_id: ' + str(self.cell_id) + '    ' + self.content
+               str(self.start_col) + ' end_col: ' + str(self.end_col) + '    '
+        # return 'CELL object - table_id: ' + str(self.table_id) + ' cell_id: ' + str(self.cell_id) + '    '
 
     # return the IoU value of two cell blocks
     def compute_cell_iou(self, another_cell):
@@ -147,7 +153,7 @@ class AdjRelation:
             dir = "vertical"
         else:
             dir = "horizontal"
-        return 'ADJ_RELATION object - ' + self._fromText.content + '  ' + self._toText.content + '    ' + dir
+        return 'ADJ_RELATION object - ' + self._fromText + '  ' + self._toText + '    ' + dir
         # return "ADJ_RELATION object - row: {}, col: {} / row:{}, col:{},  dir: {}".format(self._fromText.start_row,
         #        self._fromText.start_col, self._toText.start_row, self._toText.start_col, dir)
 
@@ -214,16 +220,17 @@ class Table:
             sc = cell.getAttribute("start-col")
             cell_id = cell.getAttribute("id")
             b_points = str(cell.getElementsByTagName("Coords")[0].getAttribute("points"))
-            try:
-                try:
-                    text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
-                except AttributeError:
-                    text = ""
-            except IndexError:
-                text = ""
+            # try:
+            #     try:
+            #         text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
+            #     except AttributeError:
+            #         text = ""
+            # except IndexError:
+            #     text = "initialized cell as no content"
+            #     # here I set a temporary string for Cell which did not have <content> element and process it later
             er = cell.getAttribute("end-row") if cell.hasAttribute("end-row") else -1
             ec = cell.getAttribute("end-col") if cell.hasAttribute("end-col") else -1
-            new_cell = Cell(table_id=str(self.id), start_row=sr, start_col=sc, cell_box=b_points, content=text,
+            new_cell = Cell(table_id=str(self.id), start_row=sr, start_col=sc, cell_box=b_points,
                             end_row=er, end_col=ec)
             # print(new_cell)
             max_row = max(max_row, int(sr), int(er))
@@ -270,11 +277,11 @@ class Table:
                     for c_from in range(self._maxCol):
                         if tab[r][c_from] == 0:
                             continue
-                        elif tab[r][c_from].content == '':
-                            continue
+                        # elif tab[r][c_from].content == '':
+                        #     continue
                         else:
                             c_to = c_from + 1
-                            if tab[r][c_to] != 0 and tab[r][c_to] != '':
+                            if tab[r][c_to] != 0:
                                 # find relation between two adjacent cells
                                 if tab[r][c_from] != tab[r][c_to]:
                                     adj_relation = AdjRelation(tab[r][c_from], tab[r][c_to], AdjRelation.DIR_HORIZ)
@@ -282,7 +289,7 @@ class Table:
                             else:
                                 # find the next non-blank cell, if exists
                                 for temp in range(c_from + 1, self._maxCol + 1):
-                                    if tab[r][temp] != 0 and tab[r][temp].content != '':
+                                    if tab[r][temp] != 0:
                                         adj_relation = AdjRelation(tab[r][c_from], tab[r][temp], AdjRelation.DIR_HORIZ)
                                         retVal.append(adj_relation)
                                         break
@@ -292,11 +299,11 @@ class Table:
                     for r_from in range(self._maxRow):
                         if tab[r_from][c] == 0:
                             continue
-                        elif tab[r_from][c].content == '':
-                            continue
+                        # elif tab[r_from][c].content == '':
+                        #     continue
                         else:
                             r_to = r_from + 1
-                            if tab[r_to][c] != 0 and tab[r_to][c].content != '':
+                            if tab[r_to][c] != 0:
                                 # find relation between two adjacent cells
                                 if tab[r_from][c] != tab[r_to][c]:
                                     adj_relation = AdjRelation(tab[r_from][c], tab[r_to][c], AdjRelation.DIR_VERT)
@@ -304,7 +311,7 @@ class Table:
                             else:
                                 # find the next non-blank cell, if exists
                                 for temp in range(r_from + 1, self._maxRow + 1):
-                                    if tab[temp][c] != 0 and tab[temp][c].content != '':
+                                    if tab[temp][c] != 0:
                                         adj_relation = AdjRelation(tab[r_from][c], tab[temp][c], AdjRelation.DIR_VERT)
                                         retVal.append(adj_relation)
                                         break
@@ -368,6 +375,8 @@ class Table:
         ret = dict(mapped_cell)
         # print(ret)
         return ret
+
+    # define the blank cell in result table by GT counterpart
 
 
 class ResultStructure:
