@@ -106,15 +106,31 @@ def _table_xml(x, y, w, h, bClosed=True, sXmlCells=None):
     return sXml
 
 
-def _cell_xml(sr, sc, er, ec, sPointXml, bFilled=True):
+def _cell_xml(sr, sc, er, ec, sPointXml
+              , bFilled=False    # do not put some text by default
+              , iShiftRow=0, iShiftCol=0 # shift the whole table
+              , bRotate=False   # swap Xs and Ys  (90° rotation)
+              ):
+    """
+    Generate the serialized XML for one cell, possibly shifted, column- or row-wise
+    
+    """
     if bFilled:
         sContent = "<content><xx>%d_%d_%d_%d_%s</xx></content>"%(sr, sc, er, ec, sPointXml)
     else:
         sContent = ""
+    
+    if bRotate:
+        lt2 = [(sPair.split(',')[0], sPair.split(',')[1]) for sPair in sPointXml.strip().split()]
+        sRotatedPointXml = " ".join("%s,%s"%(y, x) for x,y in lt2)
+        t6 = (sc+iShiftCol, sr+iShiftRow, ec+iShiftCol, er+iShiftRow, sRotatedPointXml, sContent)
+    else:
+        t6 = (sr+iShiftRow, sc+iShiftCol, er+iShiftRow, ec+iShiftCol, sPointXml, sContent)
+        
     return """<cell start-row='%d' start-col='%d' end-row='%d' end-col='%d'>
 <Coords points="%s"/>
 %s
-</cell>""" % (sr, sc, er, ec, sPointXml, sContent)
+</cell>""" % t6
 
 # -----------------------------------------------------------------------
 def test_reg_simple():
@@ -274,7 +290,7 @@ def test_table_recognition_obvious():
     assert res == (1, 0, 0), res
 
     
-def test_table_recognition_simple():
+def test_table_recognition_simple_horizontal():
     # in the run, we might have no content in the cells
     sXmlCells = " ".join([  _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70")
                          , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70")
@@ -282,25 +298,267 @@ def test_table_recognition_simple():
     GT  = _rectangle(100, 100, sXmlCells=sXmlCells)
 
     for bCellContent in [True, False]:
-        print(bCellContent)
-        sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", bCellContent)
-                                , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70", bCellContent)
+        for iShiftRow in range(0, 3):
+            for iShiftCol in range(0, 3):
+                sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", bCellContent, iShiftRow=iShiftRow, iShiftCol=iShiftCol)
+                                        , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70", bCellContent, iShiftRow=iShiftRow, iShiftCol=iShiftCol)
+                                     ])
+                RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+                res = _strEval(GT, RUN, 0.95)
+                assert res == (1, 0, 0), (bCellContent, res)    # 0.95 is for cells not table!
+                res = _strEval(GT, RUN, 0.85)
+                assert res == (1, 0, 0), (bCellContent, res)
+            
+                # 2nd cell slightly badly positionated
+                sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", bCellContent, iShiftRow=iShiftRow, iShiftCol=iShiftCol)
+                                        , _cell_xml(0,1,0,1,"64,60 70,60 70,70 64,70", bCellContent, iShiftRow=iShiftRow, iShiftCol=iShiftCol)
+                                     ])
+                RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+                res = _strEval(GT, RUN, 0.95)
+                assert res == (0, 1, 1), (bCellContent, res)    # 0.95 is for cells not table!
+                res = _strEval(GT, RUN, 0.50)
+                assert res == (1, 0, 0), (bCellContent, res)
+         
+                # one big cell overlapping both
+                sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 70,60 70,70 10,70", bCellContent, iShiftRow=iShiftRow, iShiftCol=iShiftCol)
+                                     ])
+                RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+                res = _strEval(GT, RUN, 0.85)
+                assert res == (0, 0, 1), (bCellContent, res)
+        
+                # one big cell overlapping both +  one in 0,1 but far
+                sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 70,60 70,70 10,70", bCellContent, iShiftRow=iShiftRow, iShiftCol=iShiftCol)
+                                        , _cell_xml(0,1,0,1,"260,60 270,60 270,70 260,70", bCellContent, iShiftRow=iShiftRow, iShiftCol=iShiftCol)
+                                     ])
+                RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+                res = _strEval(GT, RUN, 0.85)
+                assert res == (0, 1, 1), (bCellContent, res)
+
+def test_table_recognition_simple_vertical():
+
+        sXmlCells    = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70")
+                                , _cell_xml(1,0,1,0,"10,70 20,70 20,80 10,90")
+                         ])
+        GT  = _rectangle(100, 100, sXmlCells=sXmlCells)
+
+        # no adjacency
+        sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70")
+                                , _cell_xml(1,1,1,1,"10,70 20,70 20,80 10,90")
+                             ])
+        RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+        res = _strEval(GT, RUN, 0.50)
+        assert res == (0, 0, 1), res  
+         
+        # 2nd cells side-by-side vertically
+        sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70")
+                                , _cell_xml(1,0,1,0,"10,70 20,70 20,80 10,90")
                              ])
         RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
         res = _strEval(GT, RUN, 0.95)
-        assert res == (1, 0, 0), (bContent, res)    # 0.95 is for cells not table!
-        res = _strEval(GT, RUN, 0.85)
-        assert res == (1, 0, 0), (bContent, res)
-        print("ok for bCellContent=", bCellContent)
+        assert res == (1, 0, 0), res    # 0.95 is for cells not table!
+        res = _strEval(GT, RUN, 0.51)
+        assert res == (1, 0, 0), res
+        
+        # 2nd cells side-by-side vertically - changed order in XML
+        sXmlRunCells = " ".join([ 
+                                  _cell_xml(1,0,1,0,"10,70 20,70 20,80 10,90")
+                                , _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70")
+                             ])
+        RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (1, 0, 0), res    # 0.95 is for cells not table!
+        res = _strEval(GT, RUN, 0.51)
+        assert res == (1, 0, 0), res
+
+        # 1st cell halved
+        sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,66 10,66")
+                                , _cell_xml(1,0,1,0,"10,70 20,70 20,80 10,90")
+                             ])
+        RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (0, 1, 1), res    # 0.95 is for cells not table!
+        res = _strEval(GT, RUN, 0.51)
+        assert res == (1, 0, 0), res
+
+        # 1st cell halved and placed in 1,1
+        sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,66 10,66")
+                                , _cell_xml(1,1,1,1,"10,70 20,70 20,80 10,90")
+                             ])
+        RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (0, 0, 1), res    # 0.95 is for cells not table!
+        res = _strEval(GT, RUN, 0.51)
+        assert res == (0, 0, 1), res
+
+        # 2nd cell placed in 0,0 (INCONSISTENT prediction)
+        sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,66 10,66")
+                                , _cell_xml(0,0,0,0,"10,70 20,70 20,80 10,90")
+                             ])
+        RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (0, 0, 1), res    # 0.95 is for cells not table!
+        res = _strEval(GT, RUN, 0.51)
+        assert res == (0, 0, 1), res
+
+        # 2nd cell extended to cover part of the top of 1st cell
+        sXmlRunCells = " ".join([ _cell_xml(0,0,0,0,"10,60 20,60 20,66 10,66")
+                                , _cell_xml(1,0,1,0,"10,66 20,66 20,80 10,90")
+                             ])
+        RUN = _rectangle(90 , 100, sXmlCells=sXmlRunCells) # width=90
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (0, 1, 1), res    # 0.95 is for cells not table!
+        res = _strEval(GT, RUN, 0.51)
+        assert res == (1, 0, 0), res
+
+def test_table_recognition_simple_horizontal_vertical():
     
-    # FAILURE WHEN bCellCOntent is False
+        # some row and col displacement of the precited table...
+        for iRgt, iCgt in [(i,j) for i in range(6) for j in range(6)]:
+    
+            #    # #
+            #    #
+            sXmlCells = " ".join([  _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", iShiftRow=iRgt, iShiftCol=iCgt)
+                                  , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70", iShiftRow=iRgt, iShiftCol=iCgt)
+                                  , _cell_xml(1,0,1,0,"10,70 20,70 20,80 10,90", iShiftRow=iRgt, iShiftCol=iCgt)
+                             ])
+            GT  = _rectangle(100, 100 , sXmlCells=sXmlCells)
+    
+            # RUN same as GT
+            RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+            res = _strEval(GT, RUN, 0.95)
+            assert res == (2, 0, 0), res
+            
+            # some row and col displacement of the precited table...
+            for iR, iC in [(i,j) for i in range(3) for j in range(3)]:
+                # Now some cells get reduced by half
+                sXmlCells = " ".join([  _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", iShiftRow=iR, iShiftCol=iC)
+                              , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70", iShiftRow=iR, iShiftCol=iC)
+                              , _cell_xml(1,0,1,0,"10,70 20,70 20,76 10,86", iShiftRow=iR, iShiftCol=iC)  # here!
+                         ])
+                RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+                res = _strEval(GT, RUN, 0.95)
+                assert res == (1, 1, 1), res
+                res = _strEval(GT, RUN, 0.51)
+                assert res == (2, 0, 0), res
+        
+                sXmlCells = " ".join([  _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", iShiftRow=iR, iShiftCol=iC)
+                                      , _cell_xml(0,1,0,1,"60,60 70,60 70,66 60,66", iShiftRow=iR, iShiftCol=iC) #here
+                                      , _cell_xml(1,0,1,0,"10,70 20,70 20,80 10,90", iShiftRow=iR, iShiftCol=iC)
+                                 ])
+                RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+                res = _strEval(GT, RUN, 0.95)
+                assert res == (1, 1, 1), res
+                res = _strEval(GT, RUN, 0.51)
+                assert res == (2, 0, 0), res
+
+                # some extra cell
+                sXmlCells = " ".join([  _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", iShiftRow=iRgt, iShiftCol=iCgt)
+                                      , _cell_xml(0,1,0,1,"60,60 70,60 70,70 60,70", iShiftRow=iRgt, iShiftCol=iCgt)
+                                      , _cell_xml(1,0,1,0,"10,70 20,70 20,80 10,90", iShiftRow=iRgt, iShiftCol=iCgt)
+                                      , _cell_xml(1,1,1,1,"30,70 40,70 40,80 50,90", iShiftRow=iRgt, iShiftCol=iCgt)
+                                 ])
+                RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+                res = _strEval(GT, RUN, 0.95)
+                assert res == (2, 2, 0), res
+                res = _strEval(GT, RUN, 0.51)
+                assert res == (2, 2, 0), res
+                
+                # with some reduced size
+                sXmlCells = " ".join([  _cell_xml(0,0,0,0,"10,60 20,60 20,70 10,70", iShiftRow=iRgt, iShiftCol=iCgt)
+                                      , _cell_xml(0,1,0,1,"60,60 70,60 70,66 60,66", iShiftRow=iRgt, iShiftCol=iCgt) # here
+                                      , _cell_xml(1,0,1,0,"10,70 20,70 20,76 10,86", iShiftRow=iRgt, iShiftCol=iCgt) # here
+                                      , _cell_xml(1,1,1,1,"30,70 40,70 40,80 50,90", iShiftRow=iRgt, iShiftCol=iCgt)
+                                 ])
+                RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+                res = _strEval(GT, RUN, 0.95)
+                assert res == (0, 4, 2), res
+                res = _strEval(GT, RUN, 0.51)
+                assert res == (2, 2, 0), res
+
+def test_table_recognition_spanning_cells_simple():
+    #    ###
+    #    # #
+    for bRotate in [False, True]:
+        # bRotate allows to swap Xs and Ys"
+        sXmlCells = " ".join([  _cell_xml(0,0,0,2,"10,60 100,60 100,70 10,70", bRotate=bRotate)  # flat horizontal rectangle spanning over 3 cols
+                              , _cell_xml(1,0,1,0,"10,80  50,80  50,90 10,90", bRotate=bRotate)
+                              , _cell_xml(1,2,1,2,"60,80 100,80 100,90 60,90", bRotate=bRotate)
+                         ])
+        GT  = _rectangle(100, 100 , sXmlCells=sXmlCells)
+    
+        # RUN same as GT
+        RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (3, 0, 0), res
+    
+        
+        #    ###
+        #    ##
+        # showing that empty cells are ignored
+        sXmlCells = " ".join([  _cell_xml(0,0,0,2,"10,60 100,60 100,70 10,70", bRotate=bRotate)  # flat horizontal rectangle spanning over 3 cols
+                              , _cell_xml(1,0,1,0,"10,80  50,80  50,90 10,90", bRotate=bRotate)
+                              , _cell_xml(1,1,1,1,"60,80 100,80 100,90 60,90", bRotate=bRotate)
+                         ])
+        RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (3, 0, 0), res
+        
+        #    ###
+        #    ###
+        sXmlCells = " ".join([  _cell_xml(0,0,0,2,"10,60 100,60 100,70 10,70", bRotate=bRotate)  # flat horizontal rectangle spanning over 3 cols
+                              , _cell_xml(1,0,1,0,"10,80  90,80  90,90 10,90", bRotate=bRotate)  # another long flat rectangle
+                         ])
+        RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (0, 1, 3), res
+        res = _strEval(GT, RUN, 0.31)
+        assert res == (1, 0, 2), res
+
+                
+def test_table_recognition_spanning_cells_less_simple():
+    #    ### #
+    #    # ###
+    for bRotate in [False, True]:
+        # bRotate allows to swap Xs and Ys"
+        sXmlCells = " ".join([  _cell_xml(0,0,0,2,"10,60  100,60 100,70  10,70", bRotate=bRotate)  # flat horizontal rectangle spanning over 3 cols
+                              , _cell_xml(0,3,0,3,"210,60 250,60 250,70 210,70", bRotate=bRotate)
+                              , _cell_xml(1,0,1,0,"10,80   50,80  50,90  10,90", bRotate=bRotate)
+                              , _cell_xml(1,1,1,3,"60,80  260,80 260,90  60,90", bRotate=bRotate)
+                         ])
+        GT  = _rectangle(100, 100 , sXmlCells=sXmlCells)
+    
+        # RUN same as GT
+        RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (5, 0, 0), res
+
+        #    ### #
+        #    #   #
+        sXmlCells = " ".join([  _cell_xml(0,0,0,2,"10,60  100,60 100,70  10,70", bRotate=bRotate)  # flat horizontal rectangle spanning over 3 cols
+                              , _cell_xml(0,3,0,3,"210,60 250,60 250,70 210,70", bRotate=bRotate)
+                              , _cell_xml(1,0,1,0,"10,80   50,80  50,90  10,90", bRotate=bRotate)
+                              , _cell_xml(1,3,1,3,"210,80  260,80 260,90 210,90", bRotate=bRotate)
+                         ])
+        # RUN same as GT
+        RUN = _rectangle(100 , 100, sXmlCells=sXmlCells)
+        res = _strEval(GT, RUN, 0.95)
+        assert res == (2, 2, 3), res
+        res = _strEval(GT, RUN, 0.1)
+        assert res == (4, 0, 1), res
+ 
 
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
     # to test manually some code...
     # test_reg_quarter()
     # test_multi_table()
-    test_table_recognition_simple()
+    # test_table_recognition_obvious()
+    # test_table_recognition_simple_horizontal()
+    # test_table_recognition_simple_vertical()
+    # test_table_recognition_simple_horizontal_vertical()
+    # test_table_recognition_spanning_cells_simple()
+    test_table_recognition_spanning_cells_less_simple()
+    print("ok, test(s) done")
 
     
     
