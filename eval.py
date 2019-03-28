@@ -159,7 +159,7 @@ class eval:
                 # note: for structural analysis, use 0.8 for table mapping
                 if gtt.compute_table_iou(rest) >= table_iou_value:
                     table_matches.append((gtt, rest))
-                    remaining_tables.remove(rest)
+                    remaining_tables.remove(rest)   # unsafe... should be ok with the break below
                     break
         # print("\nfound matched table pairs: {}".format(len(table_matches)))
         # print("False positive tables: {}\n".format(remaining_tables))
@@ -172,28 +172,63 @@ class eval:
             # set up the adj relations, convert the one for result table to a dictionary for faster searching
             gt_AR = gt_table.find_adj_relations()
             total_gt_relation += len(gt_AR)
+            
             res_AR = ress_table.find_adj_relations()
             total_res_relation += len(res_AR)
-            res_AR.sort(key=lambda x: [x.fromText.start_row, x.fromText.start_col])
-            res_ar_dict = {}
-            for key, group in groupby(res_AR, key=lambda x: x.fromText):
-                # print(key)
-                res_ar_dict[key] = tuple(group)
-            # print(res_ar_dict)
-            # print("", gt_AR, "\n", res_AR, "\n", cell_mapping, "\n")
-
-            correct_dect = 0
-            # count the matched adj relations
+            
+            if False:   # for DEBUG 
+                Table.printCellMapping(cell_mapping)
+                Table.printAdjacencyRelationList(gt_AR, "GT")
+                Table.printAdjacencyRelationList(res_AR, "run")
+            
+            # Now map GT adjacency relations to result
+            lMappedAR = []
             for ar in gt_AR:
-                target_cell_from = cell_mapping.get(ar.fromText)
-                target_cell_to = cell_mapping.get(ar.toText)
-                direction = ar.direction    # DIR_HORIZ = 1 / DIR_VERT = 2
-                if (target_cell_from is None) or (target_cell_to is None):
-                    continue
-                for target_relation in res_ar_dict.get(target_cell_from):
-                    if target_relation.toText == target_cell_to and target_relation.direction == direction:
+                try:
+                    resFromCell = cell_mapping[ar.fromText]
+                    resToCell   = cell_mapping[ar.toText]
+                    #make a mapped adjacency relation
+                    lMappedAR.append(AdjRelation(resFromCell, resToCell, ar.direction))
+                except:
+                    # no mapping is possible
+                    pass
+            
+            # now we need to compare two list of adjacency relation
+            # brute force is fine, and code is safe and simple!
+            correct_dect = 0
+            for ar1 in res_AR:
+                for ar2 in lMappedAR:
+                    if ar1.isEqual(ar2):
                         correct_dect += 1
                         break
+                
+#             
+#             res_AR.sort(key=lambda x: [x.fromText.start_row, x.fromText.start_col])
+# #             res_ar_dict = {}
+# #             for key, group in groupby(res_AR, key=lambda x: x.fromText):
+# #                 # print(key)
+# #                 res_ar_dict[key] = tuple(group)
+#             # the dictionary can be created directly from groupby, as you did in find_cell_mapping
+#             res_ar_dict = dict(groupby(res_AR, key=lambda x: x.fromText))
+#             # print(res_ar_dict)
+#             # print("", gt_AR, "\n", res_AR, "\n", cell_mapping, "\n")
+# 
+#             correct_dect = 0
+#             # count the matched adj relations
+#             for ar in gt_AR:
+#                 target_cell_from = cell_mapping.get(ar.fromText)
+#                 target_cell_to = cell_mapping.get(ar.toText)
+#                 direction = ar.direction    # DIR_HORIZ = 1 / DIR_VERT = 2
+#                 if (target_cell_from is None) or (target_cell_to is None):
+#                     continue
+#                 try:
+#                     for target_relation in res_ar_dict[target_cell_from]:
+#                         if target_relation.toText == target_cell_to and target_relation.direction == direction:
+#                             correct_dect += 1
+#                             break
+#                 except KeyError: # GT relation missing from predicted
+#                     pass
+                    
             # print("found correct detection: {} for table {}".format(correct_dect, gt_table))
             total_correct_relation += correct_dect
 
