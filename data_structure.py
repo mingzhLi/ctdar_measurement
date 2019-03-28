@@ -102,8 +102,11 @@ class Cell(object):
     #     return self._content
 
     def __str__(self):
-        return 'CELL object - start_row: ' + str(self.start_row) + ' end_row: ' + str(self.end_row) + ' start_col: ' + \
-               str(self.start_col) + ' end_col: ' + str(self.end_col) + '    '
+#         return 'CELL object - start_row: ' + str(self.start_row) + ' end_row: ' + str(self.end_row) + ' start_col: ' + \
+#                str(self.start_col) + ' end_col: ' + str(self.end_col) + '    '
+        return "CELL row=[%d, %d] col=[%d, %d] (coords=%s)" %(self.start_row, self.end_row
+                                                              , self.start_col, self.end_col
+                                                              , self.cell_box)
         # return 'CELL object - table_id: ' + str(self.table_id) + ' cell_id: ' + str(self.cell_id) + '    '
 
     # return the IoU value of two cell blocks
@@ -153,7 +156,7 @@ class AdjRelation:
             dir = "vertical"
         else:
             dir = "horizontal"
-        return 'ADJ_RELATION object - ' + self._fromText + '  ' + self._toText + '    ' + dir
+        return 'ADJ_RELATION: ' + str(self._fromText) + '  ' + str(self._toText) + '    ' + dir
         # return "ADJ_RELATION object - row: {}, col: {} / row:{}, col:{},  dir: {}".format(self._fromText.start_row,
         #        self._fromText.start_col, self._toText.start_row, self._toText.start_col, dir)
 
@@ -260,9 +263,15 @@ class Table:
         return table
 
     def find_adj_relations(self):
+        """
+        NOTE: the number of empty cells between adjacent cells is not computed!
+        It seems we do not have empty cells in GT
+        But what if competitor produce some?
+        I'm not sure what to do, and do not want to touch this code for now.
+        JLM
+        """
         if self.found:
             return self.adj_relations
-
         else:
             if len(self._cells) == 0:
                 print("table is not parsed for further steps.")
@@ -344,7 +353,7 @@ class Table:
 
                 self.found = True
                 self.adj_relations = retVal
-                return self.adj_relations
+            return self.adj_relations
 
     # compute the IOU of table, pass-in var is another Table object
     def compute_table_iou(self, another_table):
@@ -378,6 +387,19 @@ class Table:
 
     # define the blank cell in result table by GT counterpart
 
+    # to print a table cell mapping
+    @classmethod
+    def printCellMapping(cls, dMappedCell):
+        print("-"*25)
+        for cell1, cell2 in dMappedCell.items():
+            print("  ", cell1, " --> ", cell2)
+
+    # to print a table set of adjacency relationsg
+    @classmethod
+    def printAdjacencyRelationList(cls, lAdjRel, title=""):
+        print("--- %s "%title + "-"*25)
+        for adj in lAdjRel:
+            print(adj)
 
 class ResultStructure:
 
