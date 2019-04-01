@@ -44,12 +44,12 @@ class Cell(object):
     # @:param content: text content of the Cell
     # @:param cell_id: unique id of the Cell
 
-    def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content_box=""):
+    def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content, content_box=""):
         self._start_row = int(start_row)
         self._start_col = int(start_col)
         self._cell_box = cell_box
         self._content_box = content_box
-        # self._content = content
+        self._content = content
         self._table_id = table_id    # the table_id this cell belongs to
         # self._cell_name = cell_id    # specify the cell using passed-in cell_id
         self._cell_id = id(self)
@@ -97,17 +97,15 @@ class Cell(object):
     def table_id(self):
         return self._table_id
 
-    # @property
-    # def content(self):
-    #     return self._content
+    @property
+    def content(self):
+        return self._content
 
     def __str__(self):
-#         return 'CELL object - start_row: ' + str(self.start_row) + ' end_row: ' + str(self.end_row) + ' start_col: ' + \
-#                str(self.start_col) + ' end_col: ' + str(self.end_col) + '    '
-        return "CELL row=[%d, %d] col=[%d, %d] (coords=%s)" %(self.start_row, self.end_row
-                                                              , self.start_col, self.end_col
-                                                              , self.cell_box)
-        # return 'CELL object - table_id: ' + str(self.table_id) + ' cell_id: ' + str(self.cell_id) + '    '
+        # return "CELL row=[%d, %d] col=[%d, %d] (coords=%s)" %(self.start_row, self.end_row
+        #                                                       , self.start_col, self.end_col
+        #                                                       , self.cell_box)
+        return "CELL %s" % self.content
 
     # return the IoU value of two cell blocks
     def compute_cell_iou(self, another_cell):
@@ -223,18 +221,17 @@ class Table:
             sc = cell.getAttribute("start-col")
             cell_id = cell.getAttribute("id")
             b_points = str(cell.getElementsByTagName("Coords")[0].getAttribute("points"))
-            # try:
-            #     try:
-            #         text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
-            #     except AttributeError:
-            #         text = ""
-            # except IndexError:
-            #     text = "initialized cell as no content"
-            #     # here I set a temporary string for Cell which did not have <content> element and process it later
+            try:
+                try:
+                    text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
+                except AttributeError:
+                    text = ""
+            except IndexError:
+                text = "initialized cell as no content"
             er = cell.getAttribute("end-row") if cell.hasAttribute("end-row") else -1
             ec = cell.getAttribute("end-col") if cell.hasAttribute("end-col") else -1
             new_cell = Cell(table_id=str(self.id), start_row=sr, start_col=sc, cell_box=b_points,
-                            end_row=er, end_col=ec)
+                            end_row=er, end_col=ec, content=text)
             # print(new_cell)
             max_row = max(max_row, int(sr), int(er))
             max_col = max(max_col, int(sc), int(ec))
@@ -250,7 +247,14 @@ class Table:
             while cur_row <= cell.end_row:
                 cur_col = cell.start_col
                 while cur_col <= cell.end_col:
-                    table[cur_row][cur_col] = cell
+                    temp = table[cur_row][cur_col]
+                    if temp == 0:
+                        table[cur_row][cur_col] = cell
+                    elif type(temp) == list:
+                        temp.append(cell)
+                        table[cur_row][cur_col] = temp
+                    else:
+                        table[cur_row][cur_col] = [temp, cell]
                     cur_col += 1
                 cur_row += 1
 
@@ -284,45 +288,122 @@ class Table:
                 # find horizontal relations
                 for r in range(self._maxRow+1):
                     for c_from in range(self._maxCol):
-                        if tab[r][c_from] == 0:
+                        temp_pos = tab[r][c_from]
+                        if temp_pos == 0:
                             continue
-                        # elif tab[r][c_from].content == '':
-                        #     continue
+                        elif type(temp_pos) == list:
+                            for cell in temp_pos:
+                                c_to = c_from + 1
+                                if tab[r][c_to] != 0:
+                                    # find relation between two adjacent cells
+                                    if type(tab[r][c_to]) == list:
+                                        for cell_to in tab[r][c_to]:
+                                            if cell != cell_to:
+                                                adj_relation = AdjRelation(cell, cell_to, AdjRelation.DIR_HORIZ)
+                                                retVal.append(adj_relation)
+                                    else:
+                                        if cell != tab[r][c_to]:
+                                            adj_relation = AdjRelation(cell, tab[r][c_to], AdjRelation.DIR_HORIZ)
+                                            retVal.append(adj_relation)
+                                else:
+                                    # find the next non-blank cell, if exists
+                                    for temp in range(c_from + 1, self._maxCol + 1):
+                                        if tab[r][temp] != 0:
+                                            if type(tab[r][temp]) == list:
+                                                for cell_to in tab[r][temp]:
+                                                    adj_relation = AdjRelation(cell, cell_to,
+                                                                               AdjRelation.DIR_HORIZ)
+                                                    retVal.append(adj_relation)
+                                            else:
+                                                adj_relation = AdjRelation(cell, tab[r][temp],
+                                                                           AdjRelation.DIR_HORIZ)
+                                                retVal.append(adj_relation)
+                                            break
                         else:
                             c_to = c_from + 1
                             if tab[r][c_to] != 0:
                                 # find relation between two adjacent cells
-                                if tab[r][c_from] != tab[r][c_to]:
-                                    adj_relation = AdjRelation(tab[r][c_from], tab[r][c_to], AdjRelation.DIR_HORIZ)
-                                    retVal.append(adj_relation)
+                                if type(tab[r][c_to]) == list:
+                                    for cell_to in tab[r][c_to]:
+                                        if temp_pos != cell_to:
+                                            adj_relation = AdjRelation(temp_pos, cell_to, AdjRelation.DIR_HORIZ)
+                                            retVal.append(adj_relation)
+                                else:
+                                    if temp_pos != tab[r][c_to]:
+                                        adj_relation = AdjRelation(temp_pos, tab[r][c_to], AdjRelation.DIR_HORIZ)
+                                        retVal.append(adj_relation)
                             else:
                                 # find the next non-blank cell, if exists
                                 for temp in range(c_from + 1, self._maxCol + 1):
                                     if tab[r][temp] != 0:
-                                        adj_relation = AdjRelation(tab[r][c_from], tab[r][temp], AdjRelation.DIR_HORIZ)
-                                        retVal.append(adj_relation)
+                                        if type(tab[r][temp]) == list:
+                                            for cell_to in tab[r][temp]:
+                                                adj_relation = AdjRelation(temp_pos, cell_to,
+                                                                           AdjRelation.DIR_HORIZ)
+                                                retVal.append(adj_relation)
+                                        else:
+                                            adj_relation = AdjRelation(temp_pos, tab[r][temp], AdjRelation.DIR_HORIZ)
+                                            retVal.append(adj_relation)
                                         break
 
                 # find vertical relations
                 for c in range(self._maxCol+1):
                     for r_from in range(self._maxRow):
-                        if tab[r_from][c] == 0:
+                        temp_pos = tab[r_from][c]
+                        if temp_pos == 0:
                             continue
-                        # elif tab[r_from][c].content == '':
-                        #     continue
+                        elif type(temp_pos) == list:
+                            for cell in temp_pos:
+                                r_to = r_from + 1
+                                if tab[r_to][c] != 0:
+                                    # find relation between two adjacent cells
+                                    if type(tab[r_to][c]) == list:
+                                        for cell_to in tab[r_to][c]:
+                                            if cell != cell_to:
+                                                adj_relation = AdjRelation(cell, cell_to, AdjRelation.DIR_VERT)
+                                                retVal.append(adj_relation)
+                                    else:
+                                        if cell != tab[r_to][c]:
+                                            adj_relation = AdjRelation(cell, tab[r_to][c], AdjRelation.DIR_VERT)
+                                            retVal.append(adj_relation)
+                                else:
+                                    # find the next non-blank cell, if exists
+                                    for temp in range(r_from + 1, self._maxRow + 1):
+                                        if tab[temp][c] != 0:
+                                            if type(tab[temp][c]) == list:
+                                                for cell_to in tab[temp][c]:
+                                                    adj_relation = AdjRelation(cell, cell_to,
+                                                                               AdjRelation.DIR_VERT)
+                                                    retVal.append(adj_relation)
+                                            else:
+                                                adj_relation = AdjRelation(cell, tab[temp][c],
+                                                                           AdjRelation.DIR_VERT)
+                                                retVal.append(adj_relation)
+                                            break
                         else:
                             r_to = r_from + 1
                             if tab[r_to][c] != 0:
                                 # find relation between two adjacent cells
-                                if tab[r_from][c] != tab[r_to][c]:
-                                    adj_relation = AdjRelation(tab[r_from][c], tab[r_to][c], AdjRelation.DIR_VERT)
-                                    retVal.append(adj_relation)
+                                if type(tab[r_to][c]) == list:
+                                    for cell_to in tab[r_to][c]:
+                                        if temp_pos != cell_to:
+                                            adj_relation = AdjRelation(temp_pos, cell_to, AdjRelation.DIR_VERT)
+                                            retVal.append(adj_relation)
+                                else:
+                                    if temp_pos != tab[r_to][c]:
+                                        adj_relation = AdjRelation(temp_pos, tab[r_to][c], AdjRelation.DIR_VERT)
+                                        retVal.append(adj_relation)
                             else:
                                 # find the next non-blank cell, if exists
                                 for temp in range(r_from + 1, self._maxRow + 1):
                                     if tab[temp][c] != 0:
-                                        adj_relation = AdjRelation(tab[r_from][c], tab[temp][c], AdjRelation.DIR_VERT)
-                                        retVal.append(adj_relation)
+                                        if type(tab[temp][c]) == list:
+                                            for cell_to in tab[temp][c]:
+                                                adj_relation = AdjRelation(temp_pos, cell_to, AdjRelation.DIR_VERT)
+                                                retVal.append(adj_relation)
+                                        else:
+                                            adj_relation = AdjRelation(temp_pos, tab[temp][c], AdjRelation.DIR_VERT)
+                                            retVal.append(adj_relation)
                                         break
 
                 # eliminate duplicates
@@ -346,10 +427,10 @@ class Table:
                         repeat = True
                         retVal.remove(duplicates[0])
 
-                # # print out the relations for test
-                # print("found {} relations in table {}:".format(len(retVal), self.id))
-                # for ret in retVal:
-                #     print(ret)
+                # print out the relations for test
+                print("found {} relations in table {}:".format(len(retVal), self.id))
+                for ret in retVal:
+                    print(ret)
 
                 self.found = True
                 self.adj_relations = retVal
@@ -385,8 +466,6 @@ class Table:
         # print(ret)
         return ret
 
-    # define the blank cell in result table by GT counterpart
-
     # to print a table cell mapping
     @classmethod
     def printCellMapping(cls, dMappedCell):
@@ -394,12 +473,13 @@ class Table:
         for cell1, cell2 in dMappedCell.items():
             print("  ", cell1, " --> ", cell2)
 
-    # to print a table set of adjacency relationsg
+    # to print a table set of adjacency relations
     @classmethod
     def printAdjacencyRelationList(cls, lAdjRel, title=""):
         print("--- %s "%title + "-"*25)
         for adj in lAdjRel:
             print(adj)
+
 
 class ResultStructure:
 
@@ -424,15 +504,16 @@ class ResultStructure:
         return "true: {}, gt: {}, res: {}".format(self._truePos, self._gtTotal, self._resTotal)
 
 
-# if __name__ == "__main__":
-#     resultFile = "./annotations/test_files/test_for_data_structure.xml"
-#     res_dom = xml.dom.minidom.parse(resultFile)
-#     res_root = res_dom.documentElement
-#     res_tables = []
-#     tables = res_root.getElementsByTagName("table")
-#     print("processing... document " + resultFile)
-#     for res_table in tables:
-#         t = Table(res_table)
-#         res_tables.append(t)
-#     table1 = res_tables[0]
-#     table1.find_adj_relations()
+if __name__ == "__main__":
+    resultFile = "./annotations/test_files/test_for_data_structure.xml"
+    res_dom = xml.dom.minidom.parse(resultFile)
+    res_root = res_dom.documentElement
+    res_tables = []
+    tables = res_root.getElementsByTagName("table")
+    print("processing... document " + resultFile)
+    for res_table in tables:
+        t = Table(res_table)
+        res_tables.append(t)
+    table1 = res_tables[0]
+    # table1.convert_2d()
+    table1.find_adj_relations()
