@@ -432,10 +432,10 @@ class Table:
                         repeat = True
                         retVal.remove(duplicates[0])
 
-                # print out the relations for test
-                print("found {} relations in table {}:".format(len(retVal), self.id))
-                for ret in retVal:
-                    print(ret)
+                # # print out the relations for test
+                # print("found {} relations in table {}:".format(len(retVal), self.id))
+                # for ret in retVal:
+                #     print(ret)
 
                 self.found = True
                 self.adj_relations = retVal
