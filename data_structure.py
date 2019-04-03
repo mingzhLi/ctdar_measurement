@@ -123,6 +123,11 @@ class Cell(object):
 
         return compute_poly_iou(cell_box_1, cell_box_2)
 
+    # check if the two cell object denotes same cell area in table
+    def check_same(self, another_cell):
+        return self._start_row == another_cell.start_row and self._end_row == another_cell.end_row and \
+               self._start_col == another_cell.start_col and self._end_col == another_cell.end_col
+
 
 # Note: currently save the relation with two cell object involved,
 # can be replaced by cell_id in follow-up memory clean up
@@ -298,7 +303,7 @@ class Table:
                                     # find relation between two adjacent cells
                                     if type(tab[r][c_to]) == list:
                                         for cell_to in tab[r][c_to]:
-                                            if cell != cell_to:
+                                            if cell != cell_to and (not cell.check_same(cell_to)):
                                                 adj_relation = AdjRelation(cell, cell_to, AdjRelation.DIR_HORIZ)
                                                 retVal.append(adj_relation)
                                     else:
@@ -359,7 +364,7 @@ class Table:
                                     # find relation between two adjacent cells
                                     if type(tab[r_to][c]) == list:
                                         for cell_to in tab[r_to][c]:
-                                            if cell != cell_to:
+                                            if cell != cell_to and (not cell.check_same(cell_to)):
                                                 adj_relation = AdjRelation(cell, cell_to, AdjRelation.DIR_VERT)
                                                 retVal.append(adj_relation)
                                     else:

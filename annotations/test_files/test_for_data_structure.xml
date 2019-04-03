@@ -101,6 +101,8 @@
 			<content>Total</content>
 		</cell>
 
+
+
 		<cell end-col="0" end-row="1" id="5" start-col="0" start-row="1">
 			<Coords points="92,461 92,472 136,472 136,461"/>
 			<content>ProductA</content>
@@ -113,6 +115,7 @@
 			<Coords points="11,22 33,44 55,66 77,88"/>
 			<content>ProductB1</content>
 		</cell>
+
         <cell end-col="4" end-row="1" id="7" start-col="3" start-row="1">
 			<Coords points="111,222 333,444 555,666 777,888"/>
 			<content>ProductC</content>
