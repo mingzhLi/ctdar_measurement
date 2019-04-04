@@ -44,12 +44,11 @@ class Cell(object):
     # @:param content: text content of the Cell
     # @:param cell_id: unique id of the Cell
 
-    def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content, content_box=""):
+    def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content_box=""):
         self._start_row = int(start_row)
         self._start_col = int(start_col)
         self._cell_box = cell_box
         self._content_box = content_box
-        self._content = content
         self._table_id = table_id    # the table_id this cell belongs to
         # self._cell_name = cell_id    # specify the cell using passed-in cell_id
         self._cell_id = id(self)
@@ -97,15 +96,10 @@ class Cell(object):
     def table_id(self):
         return self._table_id
 
-    @property
-    def content(self):
-        return self._content
-
     def __str__(self):
-        # return "CELL row=[%d, %d] col=[%d, %d] (coords=%s)" %(self.start_row, self.end_row
-        #                                                       , self.start_col, self.end_col
-        #                                                       , self.cell_box)
-        return "CELL %s" % self.content
+        return "CELL row=[%d, %d] col=[%d, %d] (coords=%s)" %(self.start_row, self.end_row
+                                                              , self.start_col, self.end_col
+                                                              , self.cell_box)
 
     # return the IoU value of two cell blocks
     def compute_cell_iou(self, another_cell):
@@ -160,17 +154,8 @@ class AdjRelation:
         else:
             dir = "horizontal"
         return 'ADJ_RELATION: ' + str(self._fromText) + '  ' + str(self._toText) + '    ' + dir
-        # return "ADJ_RELATION object - row: {}, col: {} / row:{}, col:{},  dir: {}".format(self._fromText.start_row,
-        #        self._fromText.start_col, self._toText.start_row, self._toText.start_col, dir)
 
     def isEqual(self, otherRelation):
-        # if self.fromText != otherRelation.fromText:
-        #     print("fromText not equal {} and {}".format(self.fromText.content, otherRelation.fromText.content))
-        # elif self.toText != otherRelation.toText:
-        #     print("toText not equal")
-        # elif self.direction != otherRelation.direction:
-        #     print("direction not equal")
-
         return self.fromText.cell_id == otherRelation.fromText.cell_id and \
                self.toText.cell_id == otherRelation.toText.cell_id and self.direction == otherRelation.direction
 
@@ -180,9 +165,6 @@ class Table:
     def __init__(self, tableNode):
         self._root = tableNode
         self._id = id(self)
-        # self._id = tableNode.getAttribute("id")
-        # self._page = tableNode.getElementsByTagName("region")[0].getAttribute("page")
-        # self._page = tableNode.getAttribute("page")
         self._table_coords = ""
         self._maxRow = 0    # PS: indexing from 0
         self._maxCol = 0
@@ -209,12 +191,6 @@ class Table:
 
     # parse input xml to cell lists
     def parse_table(self):
-        # regions = self._root.getElementsByTagName("region")
-        # if len(regions) != 1:
-        #     self._crosspage = True
-
-        # print("\nparsing... table " + str(self.id))
-
         # get the table bbox
         self._table_coords = str(self._root.getElementsByTagName("Coords")[0].getAttribute("points"))
 
@@ -237,7 +213,6 @@ class Table:
             ec = cell.getAttribute("end-col") if cell.hasAttribute("end-col") else -1
             new_cell = Cell(table_id=str(self.id), start_row=sr, start_col=sc, cell_box=b_points,
                             end_row=er, end_col=ec, content=text)
-            # print(new_cell)
             max_row = max(max_row, int(sr), int(er))
             max_col = max(max_col, int(sc), int(ec))
             self._cells.append(new_cell)
@@ -263,22 +238,9 @@ class Table:
                     cur_col += 1
                 cur_row += 1
 
-        # # print out table for test
-        # for x in range(self._maxRow+1):
-        #     for y in range(self._maxCol+1):
-        #         print(table[x][y])
-        #     print("\n")
-
         return table
 
     def find_adj_relations(self):
-        """
-        NOTE: the number of empty cells between adjacent cells is not computed!
-        It seems we do not have empty cells in GT
-        But what if competitor produce some?
-        I'm not sure what to do, and do not want to touch this code for now.
-        JLM
-        """
         if self.found:
             return self.adj_relations
         else:
@@ -432,18 +394,12 @@ class Table:
                         repeat = True
                         retVal.remove(duplicates[0])
 
-                # # print out the relations for test
-                # print("found {} relations in table {}:".format(len(retVal), self.id))
-                # for ret in retVal:
-                #     print(ret)
-
                 self.found = True
                 self.adj_relations = retVal
             return self.adj_relations
 
     # compute the IOU of table, pass-in var is another Table object
     def compute_table_iou(self, another_table):
-        # print(self._table_coords)
         table_box_1_temp = []
         for el in self.table_coords.split():
             table_box_1_temp.append((el.split(",")))
@@ -456,7 +412,6 @@ class Table:
         table_box_2 = list(flatten(table_box_2_temp))
         table_box_2 = [int(x) for x in table_box_2]
 
-        # print(compute_poly_iou(table_box_1, table_box_2))
         return compute_poly_iou(table_box_1, table_box_2)
 
     # find the cell mapping of tables as dictionary, pass-in var is another table and the desired IOU value
@@ -507,18 +462,3 @@ class ResultStructure:
 
     def __str__(self):
         return "true: {}, gt: {}, res: {}".format(self._truePos, self._gtTotal, self._resTotal)
-
-
-if __name__ == "__main__":
-    resultFile = "./annotations/test_files/test_for_data_structure.xml"
-    res_dom = xml.dom.minidom.parse(resultFile)
-    res_root = res_dom.documentElement
-    res_tables = []
-    tables = res_root.getElementsByTagName("table")
-    print("processing... document " + resultFile)
-    for res_table in tables:
-        t = Table(res_table)
-        res_tables.append(t)
-    table1 = res_tables[0]
-    # table1.convert_2d()
-    table1.find_adj_relations()

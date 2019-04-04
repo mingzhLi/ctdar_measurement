@@ -1,4 +1,5 @@
 Evaluation Tool for the ICDAR 2019 Competition on Table Detection and Recognition
+This tool relies on Numpy and Shapely package.
 
 Usage:
 The command line takes 4 parameters as input.

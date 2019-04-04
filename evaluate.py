@@ -85,14 +85,8 @@ if __name__ == '__main__':
     correct_seven, gt_seven = 0, 0
     correct_eight, gt_eight = 0, 0
     correct_nine, gt_nine = 0, 0
-    # correct_seven, gt_seven, res_seven = 0, 0, 0
-    # correct_eight, gt_eight, res_eight = 0, 0, 0
-    # correct_nine, gt_nine, res_nine = 0, 0, 0
 
     for each_file in res_lst:
-        # print(each_file.result[-1])
-        # for el in each_file.result:
-        #     print(el)
 
         gt_file_lst.remove(each_file.result[-1])
         correct_six += each_file.result[0].truePos
@@ -101,15 +95,12 @@ if __name__ == '__main__':
 
         correct_seven += each_file.result[1].truePos
         gt_seven += each_file.result[1].gtTotal
-        # res_seven += each_file.result[1].resTotal
 
         correct_eight += each_file.result[2].truePos
         gt_eight += each_file.result[2].gtTotal
-        # res_eight += each_file.result[2].resTotal
 
         correct_nine += each_file.result[3].truePos
         gt_nine += each_file.result[3].gtTotal
-        # res_nine += each_file.result[3].resTotal
 
     for file in gt_file_lst:
         if file.split(".") != "xml":
