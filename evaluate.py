@@ -108,9 +108,9 @@ if __name__ == '__main__':
         print(gt_file_lst)
     if len(gt_file_lst) > 0:
         print("\nWarning: missing result annotations for file: {}\n".format(gt_file_lst))
-        gt_total = process_missing_files(gt_file_lst, res_six)
+        gt_total = process_missing_files(gt_file_lst, gt_six)
     else:
-        gt_total = res_six
+        gt_total = gt_six
 
     try:
         print("Evaluation of {}".format(track.replace("-", "")))
