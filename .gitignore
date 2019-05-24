@@ -1,0 +1,4 @@
+
+*.pyc
+untar_file/str/.DS_Store
+*.DS_Store
