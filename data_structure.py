@@ -24,11 +24,15 @@ def flatten(lis):
 def compute_poly_iou(list1, list2):
     a1 = np.array(list1, dtype=int).reshape(-1, 2)
     poly1 = Polygon(a1)
+    poly1_clean = poly1.buffer(0)
+
     a2 = np.array(list2, dtype=int).reshape(-1, 2)
     poly2 = Polygon(a2)
+    poly2_clean = poly2.buffer(0)
 
     try:
-        iou = poly1.intersection(poly2).area / poly1.union(poly2).area
+        # iou = poly1.intersection(poly2).area / poly1.union(poly2).area
+        iou = poly1_clean.intersection(poly2_clean).area / poly1_clean.union(poly2_clean).area
     except ZeroDivisionError:
         iou = 0
     return iou
@@ -41,7 +45,6 @@ class Cell(object):
     # @:param end-col : end column index of the Cell
     # @:param cell_box: bounding-box of the Cell (coordinates are saved as a string)
     # @:param content_box: bounding-box of the text content within Cell (unused variable)
-    # @:param content: text content of the Cell
     # @:param cell_id: unique id of the Cell
 
     def __init__(self, table_id, start_row, start_col, cell_box, end_row, end_col, content_box=""):
@@ -170,6 +173,7 @@ class Table:
         self._maxCol = 0
         self._cells = []    # save a table as list of <Cell>s
         self.adj_relations = []    # save the adj_relations for the table
+        self.parsed = False
         self.found = False    # check if the find_adj_relations() has been called once
 
         self.parse_table()
@@ -202,22 +206,23 @@ class Table:
             sc = cell.getAttribute("start-col")
             cell_id = cell.getAttribute("id")
             b_points = str(cell.getElementsByTagName("Coords")[0].getAttribute("points"))
-            try:
-                try:
-                    text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
-                except AttributeError:
-                    text = ""
-            except IndexError:
-                text = "initialized cell as no content"
+            # try:
+            #     try:
+            #         text = cell.getElementsByTagName("content")[0].firstChild.nodeValue
+            #     except AttributeError:
+            #         text = ""
+            # except IndexError:
+            #     text = "initialized cell as no content"
             er = cell.getAttribute("end-row") if cell.hasAttribute("end-row") else -1
             ec = cell.getAttribute("end-col") if cell.hasAttribute("end-col") else -1
             new_cell = Cell(table_id=str(self.id), start_row=sr, start_col=sc, cell_box=b_points,
-                            end_row=er, end_col=ec, content=text)
+                            end_row=er, end_col=ec)
             max_row = max(max_row, int(sr), int(er))
             max_col = max(max_col, int(sc), int(ec))
             self._cells.append(new_cell)
         self._maxCol = max_col
         self._maxRow = max_row
+        self.parsed = True
 
     # generate a table-like structure for finding adj_relations
     def convert_2d(self):
@@ -244,7 +249,9 @@ class Table:
         if self.found:
             return self.adj_relations
         else:
-            if len(self._cells) == 0:
+            # if len(self._cells) == 0:
+            if self.parsed == False:
+                # fix: cases where there's no cell in table? 
                 print("table is not parsed for further steps.")
                 self.parse_table()
                 self.find_adj_relations()
