@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document filename="eu-003_1_0">
+	<table id="1">
+		<Coords points="92,442 92,528 350,528 350,442"/>
+		<cell end-col="0" end-row="2" start-col="0" start-row="2">
+			<Coords points="9,50,9,93,154,93,154,50"/>
+			<content></content>
+		</cell>
+		<cell end-col="2" end-row="2" start-col="2" start-row="2">
+			<Coords points="300,50,300,93,446,93,446,50"/>
+			<content></content>
+		</cell>
+		<cell end-col="1" end-row="2" start-col="1" start-row="2">
+			<Coords points="154,50,154,93,300,93,300,50"/>
+			<content></content>
+		</cell>
+		<cell end-col="2" end-row="0" start-col="2" start-row="0">
+			<Coords points="301,5,301,27,447,27,447,5"/>
+			<content></content>
+		</cell>
+		<cell end-col="0" end-row="1" start-col="0" start-row="1">
+			<Coords points="9,28,9,50,156,50,156,28"/>
+			<content></content>
+		</cell>
+		<cell end-col="1" end-row="0" start-col="1" start-row="0">
+			<Coords points="155,5,155,27,300,27,300,5"/>
+			<content></content>
+		</cell>
+		<cell end-col="0" end-row="0" start-col="0" start-row="0">
+			<Coords points="9,5,9,27,155,27,155,5"/>
+			<content></content>
+		</cell>
+		<cell end-col="2" end-row="1" start-col="2" start-row="1">
+			<Coords points="300,28,300,49,446,49,446,28"/>
+			<content></content>
+		</cell>
+		<cell end-col="1" end-row="1" start-col="1" start-row="1">
+			<Coords points="155,28,155,49,300,49,300,28"/>
+			<content></content>
+		</cell>
+	</table>
+</document>

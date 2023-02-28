@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document filename="eu-007_1_0">
+	<table id="1">
+		<Coords points="92,442 92,528 350,528 350,442"/>
+		<cell end-col="1" end-row="4" start-col="1" start-row="4">
+			<Coords points="107,59,107,71,195,71,195,59"/>
+			<content></content>
+		</cell>
+		<cell end-col="0" end-row="3" start-col="0" start-row="3">
+			<Coords points="1,45,1,57,106,57,106,45"/>
+			<content></content>
+		</cell>
+		<cell end-col="0" end-row="4" start-col="0" start-row="4">
+			<Coords points="1,59,1,71,107,71,107,59"/>
+			<content></content>
+		</cell>
+		<cell end-col="0" end-row="2" start-col="0" start-row="2">
+			<Coords points="1,32,1,44,107,44,107,32"/>
+			<content></content>
+		</cell>
+		<cell end-col="2" end-row="3" start-col="2" start-row="3">
+			<Coords points="194,44,194,57,290,57,290,44"/>
+			<content></content>
+		</cell>
+		<cell end-col="2" end-row="4" start-col="2" start-row="4">
+			<Coords points="194,59,194,71,290,71,290,59"/>
+			<content></content>
+		</cell>
+		<cell end-col="1" end-row="0" start-col="1" start-row="0">
+			<Coords points="107,4,107,17,195,17,195,4"/>
+			<content></content>
+		</cell>
+		<cell end-col="0" end-row="0" start-col="0" start-row="0">
+			<Coords points="1,4,1,17,107,17,107,4"/>
+			<content></content>
+		</cell>
+		<cell end-col="3" end-row="1" start-col="3" start-row="1">
+			<Coords points="290,18,290,30,386,30,386,18"/>
+			<content></content>
+		</cell>
+		<cell end-col="1" end-row="2" start-col="1" start-row="2">
+			<Coords points="107,31,107,44,194,44,194,31"/>
+			<content></content>
+		</cell>
+		<cell end-col="3" end-row="3" start-col="3" start-row="3">
+			<Coords points="290,45,290,57,386,57,386,45"/>
+			<content></content>
+		</cell>
+		<cell end-col="3" end-row="0" start-col="3" start-row="0">
+			<Coords points="289,4,289,16,386,16,386,4"/>
+			<content></content>
+		</cell>
+		<cell end-col="1" end-row="1" start-col="1" start-row="1">
+			<Coords points="107,18,107,30,195,30,195,18"/>
+			<content></content>
+		</cell>
+		<cell end-col="3" end-row="2" start-col="3" start-row="2">
+			<Coords points="289,31,289,44,386,44,386,31"/>
+			<content></content>
+		</cell>
+		<cell end-col="2" end-row="0" start-col="2" start-row="0">
+			<Coords points="194,4,194,17,290,17,290,4"/>
+			<content></content>
+		</cell>
+		<cell end-col="1" end-row="3" start-col="1" start-row="3">
+			<Coords points="107,45,107,57,195,57,195,45"/>
+			<content></content>
+		</cell>
+		<cell end-col="2" end-row="1" start-col="2" start-row="1">
+			<Coords points="194,18,194,30,290,30,290,18"/>
+			<content></content>
+		</cell>
+		<cell end-col="3" end-row="4" start-col="3" start-row="4">
+			<Coords points="289,59,289,71,386,71,386,59"/>
+			<content></content>
+		</cell>
+		<cell end-col="2" end-row="2" start-col="2" start-row="2">
+			<Coords points="195,31,195,44,290,44,290,31"/>
+			<content></content>
+		</cell>
+		<cell end-col="0" end-row="1" start-col="0" start-row="1">
+			<Coords points="1,18,1,32,107,32,107,18"/>
+			<content></content>
+		</cell>
+	</table>
+</document>

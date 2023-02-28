@@ -1,3 +1,4 @@
+
 """
 Data structures used by the evaluation process.
 
@@ -9,7 +10,7 @@ import os
 from shapely.geometry import Polygon, MultiPoint
 import numpy as np
 from collections import Iterable
-
+import torch
 
 # helper functions
 def flatten(lis):
@@ -32,7 +33,8 @@ def compute_poly_iou(list1, list2):
 
     try:
         # iou = poly1.intersection(poly2).area / poly1.union(poly2).area
-        iou = poly1_clean.intersection(poly2_clean).area / poly1_clean.union(poly2_clean).area
+        # iou = poly1_clean.intersection(poly2_clean).area / poly1_clean.union(poly2_clean).area
+        iou = poly1_clean.intersection(poly2_clean).area / poly1_clean.area
     except ZeroDivisionError:
         iou = 0
     return iou
@@ -111,7 +113,7 @@ class Cell(object):
             cell_box_1_temp.append((el.split(",")))
         cell_box_1 = list(flatten(cell_box_1_temp))
         cell_box_1 = [int(x) for x in cell_box_1]
-
+        # print()
         cell_box_2_temp = []
         for el in another_cell.cell_box.split():
             cell_box_2_temp.append((el.split(",")))
@@ -162,7 +164,10 @@ class AdjRelation:
         return self.fromText.cell_id == otherRelation.fromText.cell_id and \
                self.toText.cell_id == otherRelation.toText.cell_id and self.direction == otherRelation.direction
 
-
+def trans(cell):
+        return "CELL row=[%d, %d] col=[%d, %d] (coords=%s)" %(cell.start_row, cell.end_row
+                                                              , cell.start_col, cell.end_col
+                                                              , cell.cell_box)
 class Table:
 
     def __init__(self, tableNode):
@@ -245,6 +250,7 @@ class Table:
 
         return table
 
+    
     def find_adj_relations(self):
         if self.found:
             return self.adj_relations
@@ -256,9 +262,8 @@ class Table:
                 self.parse_table()
                 self.find_adj_relations()
             else:
-                retVal = []
+                retVal = set()
                 tab = self.convert_2d()
-
                 # find horizontal relations
                 for r in range(self._maxRow+1):
                     for c_from in range(self._maxCol):
@@ -273,25 +278,28 @@ class Table:
                                     if type(tab[r][c_to]) == list:
                                         for cell_to in tab[r][c_to]:
                                             if cell != cell_to and (not cell.check_same(cell_to)):
-                                                adj_relation = AdjRelation(cell, cell_to, AdjRelation.DIR_HORIZ)
-                                                retVal.append(adj_relation)
+                                                cfrom = trans(cell)
+                                                cto = trans(cell_to)
+                                                retVal.add((cfrom, cto, 1))
                                     else:
                                         if cell != tab[r][c_to]:
-                                            adj_relation = AdjRelation(cell, tab[r][c_to], AdjRelation.DIR_HORIZ)
-                                            retVal.append(adj_relation)
+                                            cfrom = trans(cell)
+                                            cto = trans(tab[r][c_to])
+                                            retVal.add((cfrom, cto, 1))
+            
                                 else:
                                     # find the next non-blank cell, if exists
                                     for temp in range(c_from + 1, self._maxCol + 1):
                                         if tab[r][temp] != 0:
                                             if type(tab[r][temp]) == list:
                                                 for cell_to in tab[r][temp]:
-                                                    adj_relation = AdjRelation(cell, cell_to,
-                                                                               AdjRelation.DIR_HORIZ)
-                                                    retVal.append(adj_relation)
+                                                    cfrom = trans(cell)
+                                                    cto = trans(cell_to)
+                                                    retVal.add((cfrom, cto, 1))
                                             else:
-                                                adj_relation = AdjRelation(cell, tab[r][temp],
-                                                                           AdjRelation.DIR_HORIZ)
-                                                retVal.append(adj_relation)
+                                                    cfrom = trans(cell)
+                                                    cto = trans(tab[r][temp])
+                                                    retVal.add((cfrom, cto, 1))
                                             break
                         else:
                             c_to = c_from + 1
@@ -300,24 +308,27 @@ class Table:
                                 if type(tab[r][c_to]) == list:
                                     for cell_to in tab[r][c_to]:
                                         if temp_pos != cell_to:
-                                            adj_relation = AdjRelation(temp_pos, cell_to, AdjRelation.DIR_HORIZ)
-                                            retVal.append(adj_relation)
+                                            cfrom = trans(temp_pos)
+                                            cto = trans(cell_to)
+                                            retVal.add((cfrom, cto, 1))
                                 else:
                                     if temp_pos != tab[r][c_to]:
-                                        adj_relation = AdjRelation(temp_pos, tab[r][c_to], AdjRelation.DIR_HORIZ)
-                                        retVal.append(adj_relation)
+                                        cfrom = trans(temp_pos)
+                                        cto = trans(tab[r][c_to])
+                                        retVal.add((cfrom, cto, 1))
                             else:
                                 # find the next non-blank cell, if exists
                                 for temp in range(c_from + 1, self._maxCol + 1):
                                     if tab[r][temp] != 0:
                                         if type(tab[r][temp]) == list:
                                             for cell_to in tab[r][temp]:
-                                                adj_relation = AdjRelation(temp_pos, cell_to,
-                                                                           AdjRelation.DIR_HORIZ)
-                                                retVal.append(adj_relation)
+                                                cfrom = trans(temp_pos)
+                                                cto = trans(cell_to)
+                                                retVal.add((cfrom, cto, 1))
                                         else:
-                                            adj_relation = AdjRelation(temp_pos, tab[r][temp], AdjRelation.DIR_HORIZ)
-                                            retVal.append(adj_relation)
+                                            cfrom = trans(temp_pos)
+                                            cto = trans(tab[r][temp])
+                                            retVal.add((cfrom, cto, 1))
                                         break
 
                 # find vertical relations
@@ -328,31 +339,34 @@ class Table:
                             continue
                         elif type(temp_pos) == list:
                             for cell in temp_pos:
+                                # print(cell)
                                 r_to = r_from + 1
                                 if tab[r_to][c] != 0:
                                     # find relation between two adjacent cells
                                     if type(tab[r_to][c]) == list:
                                         for cell_to in tab[r_to][c]:
                                             if cell != cell_to and (not cell.check_same(cell_to)):
-                                                adj_relation = AdjRelation(cell, cell_to, AdjRelation.DIR_VERT)
-                                                retVal.append(adj_relation)
+                                                cfrom = trans(cell)
+                                                cto = trans(cell_to)
+                                                retVal.add((cfrom, cto, 2))
                                     else:
                                         if cell != tab[r_to][c]:
-                                            adj_relation = AdjRelation(cell, tab[r_to][c], AdjRelation.DIR_VERT)
-                                            retVal.append(adj_relation)
+                                            cfrom = trans(cell)
+                                            cto = trans(tab[r_to][c])
+                                            retVal.add((cfrom, cto, 2))
                                 else:
                                     # find the next non-blank cell, if exists
                                     for temp in range(r_from + 1, self._maxRow + 1):
                                         if tab[temp][c] != 0:
                                             if type(tab[temp][c]) == list:
                                                 for cell_to in tab[temp][c]:
-                                                    adj_relation = AdjRelation(cell, cell_to,
-                                                                               AdjRelation.DIR_VERT)
-                                                    retVal.append(adj_relation)
+                                                    cfrom = trans(cell)
+                                                    cto = trans(cell_to)
+                                                    retVal.add((cfrom, cto, 2))
                                             else:
-                                                adj_relation = AdjRelation(cell, tab[temp][c],
-                                                                           AdjRelation.DIR_VERT)
-                                                retVal.append(adj_relation)
+                                                cfrom = trans(cell)
+                                                cto = trans(tab[temp][c])
+                                                retVal.add((cfrom, cto, 2))
                                             break
                         else:
                             r_to = r_from + 1
@@ -361,74 +375,98 @@ class Table:
                                 if type(tab[r_to][c]) == list:
                                     for cell_to in tab[r_to][c]:
                                         if temp_pos != cell_to:
-                                            adj_relation = AdjRelation(temp_pos, cell_to, AdjRelation.DIR_VERT)
-                                            retVal.append(adj_relation)
+                                            cfrom = trans(temp_pos)
+                                            cto = trans(cell_to)
+                                            retVal.add((cfrom, cto, 2))
                                 else:
                                     if temp_pos != tab[r_to][c]:
-                                        adj_relation = AdjRelation(temp_pos, tab[r_to][c], AdjRelation.DIR_VERT)
-                                        retVal.append(adj_relation)
+                                        cfrom = trans(temp_pos)
+                                        cto = trans(tab[r_to][c])
+                                        retVal.add((cfrom, cto, 2))
                             else:
                                 # find the next non-blank cell, if exists
                                 for temp in range(r_from + 1, self._maxRow + 1):
                                     if tab[temp][c] != 0:
                                         if type(tab[temp][c]) == list:
                                             for cell_to in tab[temp][c]:
-                                                adj_relation = AdjRelation(temp_pos, cell_to, AdjRelation.DIR_VERT)
-                                                retVal.append(adj_relation)
+                                                cfrom = trans(temp_pos)
+                                                cto = trans(cell_to)
+                                                retVal.add((cfrom, cto, 2))
                                         else:
-                                            adj_relation = AdjRelation(temp_pos, tab[temp][c], AdjRelation.DIR_VERT)
-                                            retVal.append(adj_relation)
+                                            cfrom = trans(temp_pos)
+                                            cto = trans(tab[temp][c])
+                                            retVal.add((cfrom, cto, 2))
                                         break
 
-                # eliminate duplicates
-                repeat = True
-                while repeat:
-                    repeat = False
-                    duplicates = []
-
-                    for ar1 in retVal:
-                        for ar2 in retVal:
-                            if ar1 != ar2:
-                                if ar1.direction == ar2.direction and ar1.fromText == ar2.fromText and\
-                                        ar1.toText == ar2.toText:
-                                    duplicates.append(ar2)
-                                    break
-                        else:
-                            continue
-                        break
-
-                    if len(duplicates) > 0:
-                        repeat = True
-                        retVal.remove(duplicates[0])
-
+                
                 self.found = True
                 self.adj_relations = retVal
+               
             return self.adj_relations
 
     # compute the IOU of table, pass-in var is another Table object
     def compute_table_iou(self, another_table):
         table_box_1_temp = []
         for el in self.table_coords.split():
-            table_box_1_temp.append((el.split(",")))
+            # print(el)
+            table_box_1_temp.append((el.split(",")[0],el.split(",")[1]))
         table_box_1 = list(flatten(table_box_1_temp))
-        table_box_1 = [int(x) for x in table_box_1]
+        # print(table_box_1)
+        table_box_1 = [int(x) for x  in table_box_1]
 
         table_box_2_temp = []
         for el in another_table.table_coords.split():
-            table_box_2_temp.append((el.split(",")))
+            table_box_2_temp.append((el.split(",")[0],el.split(",")[1]))
         table_box_2 = list(flatten(table_box_2_temp))
         table_box_2 = [int(x) for x in table_box_2]
-
+        # print(table_box_1, table_box_2)
         return compute_poly_iou(table_box_1, table_box_2)
 
     # find the cell mapping of tables as dictionary, pass-in var is another table and the desired IOU value
     def find_cell_mapping(self, target_table, iou_value):
         mapped_cell = []    # store the matches as tuples - (gt, result) mind the order of table when passing in
-        for cell_1 in self.table_cells:
-            for cell_2 in target_table.table_cells:
-                if cell_1.compute_cell_iou(cell_2) >= iou_value:
-                    mapped_cell.append((cell_1, cell_2))
+        cell_list1 = []
+        cell_list2 = []
+        center1 = []
+        center2 = []
+        for cell_1 in self.table_cells:     #get cell box
+            # el = cell_1.cell_box.split()
+            cell_box_temp=(cell_1.cell_box.split(","))
+            # print(cell_box_temp)
+            cell_box_1 = list(flatten(cell_box_temp))
+            cell_box_1 = [int(x) for x in cell_box_1]
+            cell_list1.append(cell_box_1)
+        for cell_2 in target_table.table_cells:
+            # el = cell_1.cell_box.split()
+            cell_box_temp=(cell_2.cell_box.split(","))
+            # print(cell_box_temp)
+            cell_box_2 = list(flatten(cell_box_temp))
+            cell_box_2 = [int(x) for x in cell_box_2]
+            cell_list2.append(cell_box_2)
+        for item in cell_list1:         #get cell box center
+            center1.append([(item[0]+item[4])//2,(item[1]+item[3])//2])
+        for item in cell_list2:
+            center2.append([(item[0]+item[4])//2,(item[1]+item[3])//2])    
+        center1 = torch.tensor(center1, dtype=torch.long)
+        center2 = torch.tensor(center2, dtype=torch.long)
+        N = len(center2)
+        k = min(10, N)
+        for i,item in enumerate(center1):
+            x2 = torch.pow(item, 2).sum().expand(N,1)
+            y2 = torch.pow(center2, 2).sum(dim=1, keepdim=True)
+            xy = (item*center2).sum(dim=1,keepdim=True)
+            dist_mat = x2+y2-2*xy
+            dist_mat = dist_mat.squeeze(-1)
+            dist_mat_sorted, sorted_indices = torch.sort(dist_mat, dim=0)
+            map_list = sorted_indices[:k]
+            for index in map_list:
+                # print(compute_poly_iou(cell_list1[i], cell_list2[index]))
+                if compute_poly_iou(cell_list1[i], cell_list2[index])>= iou_value:
+                    c1 = trans(self.table_cells[i])
+                    c2 = trans(target_table.table_cells[index])
+                    mapped_cell.append((c1, c2))
                     break
+        
         ret = dict(mapped_cell)
         # print(ret)
         return ret
