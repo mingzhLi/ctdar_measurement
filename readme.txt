@@ -1,5 +1,6 @@
 Evaluation Tool for the ICDAR 2019 Competition on Table Detection and Recognition
 This tool relies on Numpy and Shapely package.
+I have made some improvements based on the previous version, which speeds up the valuation process and make it possible to evaluate those big tables with nearly 1000 cells in linear time.
 
 Usage:
 The command line takes 4 parameters as input.
