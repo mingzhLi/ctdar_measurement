@@ -444,9 +444,9 @@ class Table:
             cell_box_2 = [int(x) for x in cell_box_2]
             cell_list2.append(cell_box_2)
         for item in cell_list1:         #get cell box center
-            center1.append([(item[0]+item[4])//2,(item[1]+item[3])//2])
+            center1.append([(item[0]+item[4])//2,(item[1]+item[5])//2])
         for item in cell_list2:
-            center2.append([(item[0]+item[4])//2,(item[1]+item[3])//2])    
+            center2.append([(item[0]+item[4])//2,(item[1]+item[5])//2])    
         center1 = torch.tensor(center1, dtype=torch.long)
         center2 = torch.tensor(center2, dtype=torch.long)
         N = len(center2)
